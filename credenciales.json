@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "lavanda-389308",
+  "private_key_id": "b9c190b7790ac6c49cc64149df205cdcfa4b4427",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDAAE33nV/S4iGj\nRGZuYx+YUYiqXrq4nvlXSm9IVZzz5/9R0noub96tA+89vP1XGysAbEtLfUV2DAc2\nfTFV4LIIwUZ0hr6o6ZhTUrjfkYyvULKoZaeqWLZeS70+Q4BYgCfjy/VosgYRb0Su\nLbdG6oQKZz5S5ne/K9FXgiOUFABndIaIHhNQr/3uzO1NOrbSg6xQDR26iqfzuK9G\niAiURtDwyRQg09Xy8y9jmnIfuW2dA6bTNItolrfFiux4mbWa4ucxSYjyRe86BUuO\nYpy51wJuw2SjCdd6mrul2bpSO1CsWAUI0P6gpaBOkuFJXWhmAYUTzRSQc4OsPAvu\nA3i8b1rZAgMBAAECggEAIzm7FDeVjctql/lz4INDl+63h+he0gHqpZL0tTzt0Yrq\nGyEmRPBF1pDO+xD6GtnTax2zN7uZO5Xr2dmgrEyP5U7OZhEVmEhZJ8pYvD3IJZ8E\n1CPoXbauaMD1DKAWQ0Zp6x9vnCBzQA4dt+YPxs0+Yek8tDlv1U1M+ETaUa/UviX+\n4jQwp+NOjvwvD9vZVx5cy1hy1pG6HxdyalRguTy2+TwIoR3K7FWKn+BvmqupiRCw\nANWZ1yAGcw2FauIt9HNY0v8nLd6ok/+25aEOl60ePkAfA1UfceTcXmFujOVWEk+e\nohAQpvEF7QsBIz6SZhsqhodbs0L7a1E6yXTYO2Ez/QKBgQD/TIvCC99di4a4WJ8v\nDhzG6N7MuK4RsEpShgklY9DlxgGnBWY2zNVq8dX5EgOOiZGZWzBQMq1+0ArnNv1Z\nY82J2sr4ATadGRmJ9a1BJ12dB/i4Khb37SNiIsrkyVodkTSO6mNZOTxrF/mDG9qu\nuT7rLsiBZxP28B4vUvQALVJplQKBgQDAh0P4Bm1ePDMiX2lQ7rKppRct/PqxqIv+\ngt9o8uNGvzc6qkRlUGFLE2CC2GGG+pKZnh1qQQXHGOsp7VU1XzdcXJ8VsRatk4UW\nRQTgJx07ymqEXxkrkoxdIbKTVVjFjI16Dcj2/IEP6OHkejJy+UCyCN/thjLvfjQ5\n1fyAdWfDNQKBgFv2/wFPtY7FDCqsAeu5cbRVfqzQeiP1FVDU58aIRl//C+lWkJN9\nBgQYSbQHQTC/bauIpca9+rGLz+GqdWkWApx+LE9aYIoG2KRR0698tsQycu4ke1Gk\nIvLfBaeUwNmVzREObeteKt2JLWCFUClQodGmcKPstcxmgvkZMLw/l0hhAoGBALvk\nhtHMu/nGuISoJukEOzrS0l9gT+0IN6/oW05aFLKbtLO9LcjOfFU/kOXBdNS9QEtJ\ngx2KXbAjwoWFiK3wwd+SyPLrg91cZfsI2qxDoAUVE4UiJjde6zuMwnGFToBlHkFq\nqKFaZj53odVP6GJKnPfjL17opFcUjLWQ/78CVYStAoGAaOoCyvieU8UulCTBVxOo\n05yZR44BA6oeZRruTaW1wTjazBetCRQPnt39kocAC9V+fO7tP1gJ3hXOXNocd/Z0\nn6ce2ZKpC0mLft0jw2VaFSQt3HdiGI6DZfUrKHXXEtEwf3u+pprrTIt/pk9ZZtwE\nOkmgBk9XVOkKfqHE+uXhBHQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "googledriveapilavanda@lavanda-389308.iam.gserviceaccount.com",
+  "client_id": "107709555940662296780",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/googledriveapilavanda%40lavanda-389308.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
