@@ -12,7 +12,7 @@ class ActuacionesController extends Controller
     /**
      * Muestra un listado de actuaciones con opción de búsqueda.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function index(Request $request)
     {
@@ -31,7 +31,7 @@ class ActuacionesController extends Controller
     /**
      * Muestra el formulario para crear una nueva actuación.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function create()
     {
@@ -43,7 +43,7 @@ class ActuacionesController extends Controller
      * Almacena una nueva actuación en el almacenamiento.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -78,7 +78,7 @@ class ActuacionesController extends Controller
      * Almacena una nueva actuación en el almacenamiento de forma manual.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function storeManual(Request $request)
     {

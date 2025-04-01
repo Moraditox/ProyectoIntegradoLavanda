@@ -9,6 +9,11 @@ class Formulario_Seguimiento_Alumno extends Model
 {
     use HasFactory;
 
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+    }
+
     static $rules = [
         'correo' => 'required',
         'empresa_id' => 'required',
@@ -32,7 +37,8 @@ class Formulario_Seguimiento_Alumno extends Model
         'actividades_y_tareas_que_estas_realizando_en_la_empresa', 'posibilidades_formativas_que_ofrece_la_empresa',
         'cumplimiento_del_programa_formativo_por_parte_de_la_empresa', 'seguimiento_realizado_por_el_tutor_del_centro_de_trabajo',
         'seguimiento_hecho_por_tu_profesor', 'adecuacion__formacion_recibida_en_centro_docente_con_practicas',
-        'integracion_en_el_entorno_laboral', 'observaciones', 'sugerencias_de_mejora', 'valoracion_general_de_las_practicas'
+        'integracion_en_el_entorno_laboral', 'observaciones', 'sugerencias_de_mejora', 'valoracion_general_de_las_practicas',
+        'id_convocatoria'
     ];
 
     protected $table = 'formulario_seguimiento_alumno';

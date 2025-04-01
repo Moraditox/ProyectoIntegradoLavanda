@@ -342,7 +342,11 @@ class AlumnadoController extends Controller
         $asignacion = Asignaciones::where('alumnado_id', $alumno->id)->latest()->first();
         request()->validate(Formulario_Seguimiento_Alumno::$rules);
 
-        $formulario = new Formulario_Seguimiento_Alumno($request->all());
+        // Create the form data with all required fields
+        $formData = $request->all();
+        $formData['alumnado_id'] = $alumno->id; // Ensure alumnado_id is set
+
+        $formulario = new Formulario_Seguimiento_Alumno($formData);
         $formulario->id_convocatoria = $asignacion->convocatoria_id;
         $formulario->save();
         $actuacion =  new Actuaciones(['emisor' => 'Alumno', 'tipo' => 'Automatico',
@@ -352,7 +356,6 @@ class AlumnadoController extends Controller
 
         return redirect()->route('alumno.mail', ['token' => $token])
             ->with('success', 'El informe se ha añadido correctamente.');
-
     }
 
 
