@@ -8,6 +8,7 @@ use App\Http\Controllers\ConvocatoriasController;
 use App\Http\Controllers\ActuacionesController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MatriculaController;
+use App\Http\Controllers\CursoAcademicoNewController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -205,3 +206,13 @@ use App\Http\Controllers\InformesTutoresLaboralesController;
 
 Route::get('/informesTutoresLaborales', [InformesTutoresLaboralesController::class, 'index'])->name('informesTutoresLaborales');
 Route::post('/informesTutoresLaborales', [InformesTutoresLaboralesController::class, 'store'])->name('informesTutoresLaborales.store');
+
+// NUEVAS RUTAS
+
+// CURSOS
+// Ruta para enseñar los cursos académicos
+Route::get('/cursos', [CursoAcademicoNewController::class, 'index'])->name('cursos.index')->middleware('auth');
+// Ruta para añadir profesores a un curso académico
+Route::get('/cursos/{courseId}/assign-professors', [CursoAcademicoNewController::class, 'addTeachersToCourse'])->name('cursos.assingTeachers')->middleware('auth');
+// Ruta que recoge el formulario para añadir profesores a un curso académico
+Route::post('/curso_academico/{courseId}/storeTeachers', [CursoAcademicoNewController::class, 'storeTeachersToCourse'])->name('curso_academico.storeTeachers')->middleware('auth');

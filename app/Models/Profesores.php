@@ -50,4 +50,12 @@ class Profesores extends Model implements Authenticatable
     {
         return 'remember_token';
     }
+
+    // NUEVO CÓDIGO
+
+    // Relación N:N con cursos academicos
+    public function cursosAcademicos()
+    {
+        return $this->belongsToMany(Curso_Academico::class, 'curso_academico_profesor', 'profesores_id', 'curso_academico_id');
+    }
 }
