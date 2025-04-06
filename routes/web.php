@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnoAcademicoNewController;
 use App\Http\Controllers\AsignacionesController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\AlumnadoController;
@@ -216,3 +217,6 @@ Route::get('/cursos', [CursoAcademicoNewController::class, 'index'])->name('curs
 Route::get('/cursos/{courseId}/assign-professors', [CursoAcademicoNewController::class, 'addTeachersToCourse'])->name('cursos.assingTeachers')->middleware('auth');
 // Ruta que recoge el formulario para añadir profesores a un curso académico
 Route::post('/curso_academico/{courseId}/storeTeachers', [CursoAcademicoNewController::class, 'storeTeachersToCourse'])->name('curso_academico.storeTeachers')->middleware('auth');
+
+// Anno Academico
+Route::post('/curso_academico', [AnnoAcademicoNewController::class, 'store'])->name('curso_academico.store');
