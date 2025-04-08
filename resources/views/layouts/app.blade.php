@@ -61,9 +61,6 @@
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" href="{{ url('/empresas') }}">Empresas</a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{ url('/listadoEmpresas') }}">Empresas</a>
-                        </li> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -72,22 +69,10 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ url('/alumnado') }}">Alumnado</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/profesorado') }}">Profesorado</a></li>
-                              
                                 <li><a class="dropdown-item" href="{{ url('/trabajadores') }}">Trabajadores</a></li>
+                                <li><a class="dropdown-item" href="{{ url('/cursos') }}">Cursos</a></li>
                             </ul>
                         </li>
-                        <!-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Informes
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url('/file') }}">Informes alumnado</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/informesProfesorado') }}">Informes profesorado</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/informesTutoresLaborales') }}">Informes de tutores laborales</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/fichasSemanales') }}">Fichas semanales</a></li>
-                            </ul>
-                        </li> -->
                     </ul>
                 </div>
 
