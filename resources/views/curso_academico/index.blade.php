@@ -22,7 +22,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                     <label for="yearInput" class="form-label">Año Académico</label>
-                    <input type="text" class="form-control" id="yearInput" name="anno" placeholder="Ejemplo: 2023-2024" required>
+                    <input type="text" class="form-control" id="yearInput" name="year" placeholder="Ejemplo: 2023-2024" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -33,6 +33,20 @@
             </div>
             </div>
         </div>
+
+        @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
     </div>
     <table class="table table-striped">
         <thead>

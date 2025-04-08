@@ -55,7 +55,7 @@ class CursoAcademicoNewController extends Controller
         $course->profesores()->sync($request->profesores); 
 
         // Redirigimos con un mensaje de éxito
-        return redirect()->route('cursos.assingTeachers', $courseId)->with('success', 'Profesores asignados correctamente');
+        return redirect()->route('cursos.index')->with('success', 'Profesores asignados correctamente');
     }
 
 
