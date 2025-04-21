@@ -7,6 +7,7 @@ use App\Http\Controllers\AlumnadoController;
 use App\Http\Controllers\ProfesoradoController;
 use App\Http\Controllers\ConvocatoriasController;
 use App\Http\Controllers\ActuacionesController;
+use App\Http\Controllers\ActuacionesEmpresaController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MatriculaController;
 use App\Http\Controllers\CursoAcademicoNewController;
@@ -59,6 +60,7 @@ Route::get('/convocatorias/edit/{convocatoria}', [App\Http\Controllers\Convocato
 Route::get('/actuaciones/create', [ActuacionesController::class, 'create'])->name('actuaciones.create')->middleware('auth');
 // Ruta para el formulario
 Route::match(['get', 'post'], '/actuaciones/storeManual', [ActuacionesController::class, 'storeManual'])->name('actuaciones.storeManual');
+Route::match(['get', 'post'], '/actuaciones_empresa/storeManual', [ActuacionesEmpresaController::class, 'storeManual'])->name('actuaciones_empresa.storeManual');
 // Resto de las rutas
 Route::resource('actuaciones', ActuacionesController::class)->except(['show']);
 
@@ -183,7 +185,9 @@ Route::get('/alumnado/seguimiento/{token}', [App\Http\Controllers\AlumnadoContro
 Route::get('/alumnado/{token}/empresa/{empresa}/form/', [\App\Http\Controllers\AlumnadoController::class, 'informeAlumnoEmpresa'])->name('informeAlumnoEmpresa');
 
 Route::post('/alumnado/{token}/empresa/{empresa}/form/', [\App\Http\Controllers\AlumnadoController::class, 'guardarInformeAlumnoEmpresa'])->name('guardarInformeAlumnoEmpresa');
-
+Route::get('/actuaciones-empresa/create', [App\Http\Controllers\ActuacionesEmpresaController::class, 'create'])
+    ->name('actuaciones-empresa.create')->middleware('auth');
+Route::post('/actuaciones/store', [ActuacionesEmpresaController::class, 'store'])->name('actuaciones_empresa.store')->middleware('auth');
 // Route::get('/alumnado/{token}/informe/{')->name('mailInforme');
 
 
