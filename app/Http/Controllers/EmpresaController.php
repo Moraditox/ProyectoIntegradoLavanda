@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actuaciones;
+use App\Models\Actuaciones_Empresa;
 use App\Models\Alumnado;
 use App\Models\Anno_Academico;
 use App\Models\Asignaciones;
@@ -122,6 +123,8 @@ class EmpresaController extends Controller
 
         $informesAlumnado = InformesAlumnado::where('empresa_id', $empresaId)->get();
         $informesProfesorado = InformesProfesorado::where('empresa_id', $empresaId)->get();
+        $actuaciones = Actuaciones_Empresa::where('id_empresa', $empresaId)->get();
+
         // Media Alumnos
         $mediaPosibilidadesFormativasAlumnado = round($informesAlumnado->avg('posibilidades_formativas'), 1);
         $mediaCumplimientoProgramaAlumnado = round($informesAlumnado->avg('cumplimiento_programa'), 1);
@@ -150,10 +153,12 @@ class EmpresaController extends Controller
             $curso = $alumno->matricula->cursoAcademico->curso ?? 'N/A';
             $ciclo = $alumno->matricula->cursoAcademico->ciclo ?? 'N/A';
 
-            $alumno->curso = $curso;
-            $alumno->ciclo = $ciclo;
-            $alumno->nombre_profesor = optional($profesor)->nombre ?? 'N/A';
+            // $alumno->curso = $curso;
+            // $alumno->ciclo = $ciclo;
+            // $alumno->nombre_profesor = optional($profesor)->nombre ?? 'N/A';
         }
+
+
 
         // Pasar todos los datos necesarios a la vista
         return view('empresa.show', compact(
@@ -162,6 +167,7 @@ class EmpresaController extends Controller
             'alumnosFct',
             'informesAlumnado',
             'informesProfesorado',
+            'actuaciones',
             'mediaInformesAlumnado',
             'mediaInformesProfesorado',
             'mediaPosibilidadesFormativasAlumnado',
