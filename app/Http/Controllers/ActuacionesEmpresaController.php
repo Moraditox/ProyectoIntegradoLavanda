@@ -108,7 +108,7 @@ class ActuacionesEmpresaController extends Controller
 
         // Redireccionar al índice de actuaciones_empresa
         echo "Redireccionando al índice de actuaciones_empresa...\n";
-        return redirect()->route('empresas.index')
+        return redirect()->route('empresas.show', ['empresa' => $request->input('id_empresa')])
             ->with('success', 'Actuación creada manualmente exitosamente.');
         }
 }
