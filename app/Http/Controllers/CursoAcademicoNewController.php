@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Curso_Academico_new;
+use App\Http\Controllers\ActionLogController;
 
 class CursoAcademicoNewController extends Controller
 {
@@ -53,6 +54,9 @@ class CursoAcademicoNewController extends Controller
         // Esto se sincroniza la relación muchos a muchos entre cursos y profesores
         // Elimina las relaciones existentes y añade las nuevas
         $course->profesores()->sync($request->profesores); 
+
+        // Registramos la acción en el log
+        ActionLogController::log('Asignación de profesores', 'Profesores asignados al curso académico ID: ' . $courseId);
 
         // Redirigimos con un mensaje de éxito
         return redirect()->route('cursos.index')->with('success', 'Profesores asignados correctamente');
