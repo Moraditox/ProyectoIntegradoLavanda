@@ -38,20 +38,17 @@
 
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('storage/avatar/iesgrancapitan.png') }}" alt="Logo" style="max-width: 100px;">
-                    {{ config('app.name', 'Lavanda') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm" style="font-size: 1.2rem; display: flex; justify-content: center; align-items: center; width: 100%;">
+            <div class="container d-flex justify-content-center align-items-center max-w-100">
+                <div class="d-flex align-items-center" style="flex-grow: 1;">
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        <img src="{{ asset('storage/avatar/iesgrancapitan.png') }}" alt="Logo" style="max-width: 100px; margin-right: 10px;">
+                        {{ config('app.name', 'Lavanda') }}
+                    </a>
+                </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <div id="navbarSupportedContent">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" href="{{ url('/home') }}">Convocatorias</a>
                         </li>
@@ -61,9 +58,6 @@
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" href="{{ url('/empresas') }}">Empresas</a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{ url('/listadoEmpresas') }}">Empresas</a>
-                        </li> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -72,30 +66,15 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ url('/alumnado') }}">Alumnado</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/profesorado') }}">Profesorado</a></li>
-                              
                                 <li><a class="dropdown-item" href="{{ url('/trabajadores') }}">Trabajadores</a></li>
+                                <li><a class="dropdown-item" href="{{ url('/cursos') }}">Cursos</a></li>
                             </ul>
                         </li>
-                        <!-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Informes
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url('/file') }}">Informes alumnado</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/informesProfesorado') }}">Informes profesorado</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/informesTutoresLaborales') }}">Informes de tutores laborales</a></li>
-                                <li><a class="dropdown-item" href="{{ url('/fichasSemanales') }}">Fichas semanales</a></li>
-                            </ul>
-                        </li> -->
                     </ul>
                 </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-                    <!-- Right Side Of Navbar -->
+                <div class="d-flex align-items-center" style="flex-grow: 1;">
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
                         @guest
                             {{-- @if (Route::has('login'))
                                 <li class="nav-item">

@@ -54,31 +54,4 @@
             <button type="submit" class="btn btn-primary">Importar</button>
         </form>
     </div>
-
-    {{-- Select2 --}}
-    <script>
-        $(document).ready(function() {
-            $('#curso').select2({
-                language: {
-                    noResults: function() {
-                        return 'No se encontraron resultados';
-                    }
-                }
-            });
-        });
-    </script>
-
-    @if ($actionImagenes != null)
-        <div class="container mt-4">
-            <h1>Subir imágenes</h1>
-            <form action="{{ $actionImagenes }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="form-group">
-                    <label for="archivo">Seleccionar imágenes</label>
-                    <input type="file" name="archivo[]" id="archivo" accept="image/*" multiple required>
-                </div>
-                <button type="submit" class="btn btn-primary">Subir</button>
-            </form>
-        </div>
-    @endif
 @endsection
