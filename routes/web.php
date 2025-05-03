@@ -31,25 +31,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// para mandar el correo
-//Route::post('/enviar-correo/{empresa}', 'MailController@enviarCorreoParticipar')->name('enviar-correo-participar');
-
-
 Route::resource('empresas', EmpresaController::class)->middleware('auth');
-
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('auth');
-
 Route::get('/alumnado', [App\Http\Controllers\AlumnadoController::class, 'index'])->name('alumnado')->middleware('auth');
 Route::post('/alumnados/import', [AlumnadoController::class, 'import'])->name('alumnados.import')->middleware('auth');
 Route::post('/alumnados/uploadImages', [AlumnadoController::class, 'uploadImages'])->name('alumnados.uploadImages')->middleware('auth');
-
 Route::get('/profesorado', [App\Http\Controllers\ProfesoradoController::class, 'index'])->name('profesorado')->middleware('auth');
 Route::post('/profesorados/import', [ProfesoradoController::class, 'import'])->name('profesorados.import')->middleware('auth');
 Route::post('/profesorados/uploadImages', [ProfesoradoController::class, 'uploadImages'])->name('profesorados.uploadImages')->middleware('auth');
-
 Route::get('/trabajadores', [App\Http\Controllers\TrabajadorController::class, 'create'])->name('trabajadores')->middleware('auth');
 Route::post('/trabajadores', [App\Http\Controllers\TrabajadorController::class, 'store'])->name('trabajadores.store')->middleware('auth');
-
 Route::resource('convocatorias', ConvocatoriasController::class)->middleware('auth');
 Route::get('/convocatorias/create', [App\Http\Controllers\ConvocatoriasController::class, 'create'])->name('convocatoria.create')->middleware('auth');
 Route::post('/convocatorias', [App\Http\Controllers\ConvocatoriasController::class, 'store'])->name('convocatoria.store')->middleware('auth');
@@ -73,13 +64,6 @@ Route::get('/empresa', [EmpresaController::class, 'indexConvocatoria'])->name('e
 
 Route::get('/empresas-disponibles/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'empresasDisponibles'])->name('empresasDisponibles');
 Route::get('/profesores-disponibles', [App\Http\Controllers\ConvocatoriasController::class, 'getProfesoresDisponibles'])->name('getProfesoresDisponibles');
-Route::post('/enviar-correo-participar/{empresa}/{convocatoria}', [MailController::class, 'enviarCorreoParticipar'])
-    ->name('enviar-correo-participar')->middleware('auth');
-
-
-Route::get('/enviar-correo-participar/{empresa}/{convocatoria}', [MailController::class, 'handleGetRequestParticipar'])
-    ->name('enviar-correo-participar.get');
-
 
 Route::get('/ver-formulario/{alumnoId}', [App\Http\Controllers\ConvocatoriasController::class, 'verFormularioSeguimiento'])->name('verFormularioSeguimiento');
 // Route::get('ver-formulario/{alumnoId}', [App\Http\Controllers\ConvocatoriasController::class, 'verFormularioSeguimiento'])->name('verFormularioSeguimiento');
@@ -142,19 +126,9 @@ Route::get('/alumnosBuscar', [App\Http\Controllers\AlumnadoController::class, 'b
 Route::post('/guardar-informe-alumno-empresa', [AlumnadoController::class, 'guardarInformeAlumnoEmpresa'])->name('guardarInformeAlumnoEmpresa');
 Route::get('/listadoEmpresas', [App\Http\Controllers\EmpresaController::class, 'listadoEmpresas'])->name('empresa.listadoEmpresas')->middleware('auth');
 Route::get('/empresa/{nombre}/convocatorias', [App\Http\Controllers\EmpresaController::class, 'convocatorias'])->name('empresa.convocatorias')->middleware('auth');
-Route::get('/enviar-correo-alumno/{matriculaId}', [App\Http\Controllers\MailController::class, 'enviarCorreoAlumno'])->name('enviar-correo-alumno');
 Route::post('/procesar-formulario', [AlumnadoController::class, 'procesarFormulario'])->name('ruta_para_procesar_formulario');
-Route::get('/mailejemplo/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoPrueba'])->name('mail.ejemplo')->middleware('auth');
 Route::delete('/convocatoria-empresas/{convocatoria_empresa}', [ConvocatoriasController::class, 'destroyConvocatoriaEmpresa'])->name('convocatoria_empresas.destroy');
-Route::get('/mailSeguimieto/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoSeguimiento'])->name('mail.enviarSeguimiento')->middleware('auth');
-// Route::post('/guardar-informe-empresa-alumno/{empresa}/{alumno}', [ConvocatoriasController::class, 'guardarInformeEmpresaAlumno'])->name('guardarInformeEmpresaAlumno');
-Route::get('/mailInforme/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoInforme'])->name('mail.enviarInforme')->middleware('auth');
-Route::get('/enviar-correo-empresa/{empresaId}', [MailController::class, 'enviarCorreoEmpresa'])->name('enviar-correo-empresa');
-// No hay necesidad de middleware (se controla la entrada con el token)
-Route::get('/enviar-correo-pdf-empresa/{empresaId}', [MailController::class, 'enviarCorreoPdfEmpresa'])
-    ->name('enviar-correo-pdf-empresa');
-Route::get('/enviar-correo-pdf-alumno/{alumnoId}', [MailController::class, 'enviarCorreoPdfAlumno'])
-    ->name('enviar-correo-pdf-alumno');
+
 
 Route::get('/empresa/{token}', [App\Http\Controllers\EmpresaController::class, 'mail'])->name('empresa.mail');
 
@@ -220,3 +194,18 @@ Route::post('/curso_academico/{courseId}/storeTeachers', [CursoAcademicoNewContr
 
 // Anno Academico
 Route::post('/curso_academico', [CursosAcademicosController::class, 'store'])->name('curso_academico.store');
+
+// Rutas de envío de correos
+Route::get('/mailejemplo/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoPrueba'])->name('mail.ejemplo')->middleware('auth');
+Route::get('/mailSeguimieto/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoSeguimiento'])->name('mail.enviarSeguimiento')->middleware('auth');
+Route::get('/mailInforme/{token}/{receptor}/{email}', [\App\Http\Controllers\MailController::class, 'EnviarCorreoInforme'])->name('mail.enviarInforme')->middleware('auth');
+Route::get('/enviar-correo-empresa/{empresaId}', [MailController::class, 'enviarCorreoEmpresa'])->name('enviar-correo-empresa');
+Route::get('/enviar-correo-alumno/{matriculaId}', [App\Http\Controllers\MailController::class, 'enviarCorreoAlumno'])->name('enviar-correo-alumno');
+Route::post('/enviar-correo-participar/{empresa}/{convocatoria}', [MailController::class, 'enviarCorreoParticipar'])
+    ->name('enviar-correo-participar')->middleware('auth');
+Route::get('/enviar-correo-participar/{empresa}/{convocatoria}', [MailController::class, 'handleGetRequestParticipar'])
+    ->name('enviar-correo-participar.get');
+Route::get('/enviar-correo-pdf-empresa/{empresaId}', [MailController::class, 'enviarCorreoPdfEmpresa'])
+    ->name('enviar-correo-pdf-empresa');
+Route::get('/enviar-correo-pdf-alumno/{alumnoId}', [MailController::class, 'enviarCorreoPdfAlumno'])
+    ->name('enviar-correo-pdf-alumno');
