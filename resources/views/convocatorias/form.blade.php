@@ -40,6 +40,8 @@
             <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
                 <select class="form-control select2" name="curso_academico[]" multiple>
                     <option value="" disabled>Selecciona los cursos académicos</option>
+                    {{-- SUGERENCIA: AÑADIR TODOS LOS CURSOS DEL AÑO ACADÉMICO, HACE FALTA HACER CAMBIOS PREVIOS PARA HACER ESTO
+                    CONSULTAR A JESÚS --}}
                     @foreach ($cursos as $cursoValue => $cursoLabel)
                         @php
                         if(isset($cursosSeleccionados)) {

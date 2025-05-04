@@ -9,7 +9,7 @@ class Convocatoria_Empresa extends Model
 {
     use HasFactory;
 
-    protected $table = 'convocatoria_empresa';
+    protected $table = 'convocatoria_empresas';
 
     static $rules = [
         'convocatoria_id' => 'required',

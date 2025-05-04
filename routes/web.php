@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\FileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,19 +34,11 @@ Route::get('/', function () {
 
 Route::resource('empresas', EmpresaController::class)->middleware('auth');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('auth');
-Route::get('/alumnado', [App\Http\Controllers\AlumnadoController::class, 'index'])->name('alumnado')->middleware('auth');
-Route::post('/alumnados/import', [AlumnadoController::class, 'import'])->name('alumnados.import')->middleware('auth');
-Route::post('/alumnados/uploadImages', [AlumnadoController::class, 'uploadImages'])->name('alumnados.uploadImages')->middleware('auth');
 Route::get('/profesorado', [App\Http\Controllers\ProfesoradoController::class, 'index'])->name('profesorado')->middleware('auth');
 Route::post('/profesorados/import', [ProfesoradoController::class, 'import'])->name('profesorados.import')->middleware('auth');
 Route::post('/profesorados/uploadImages', [ProfesoradoController::class, 'uploadImages'])->name('profesorados.uploadImages')->middleware('auth');
 Route::get('/trabajadores', [App\Http\Controllers\TrabajadorController::class, 'create'])->name('trabajadores')->middleware('auth');
 Route::post('/trabajadores', [App\Http\Controllers\TrabajadorController::class, 'store'])->name('trabajadores.store')->middleware('auth');
-Route::resource('convocatorias', ConvocatoriasController::class)->middleware('auth');
-Route::get('/convocatorias/create', [App\Http\Controllers\ConvocatoriasController::class, 'create'])->name('convocatoria.create')->middleware('auth');
-Route::post('/convocatorias', [App\Http\Controllers\ConvocatoriasController::class, 'store'])->name('convocatoria.store')->middleware('auth');
-Route::get('/convocatorias/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'show'])->name('convocatoria.show')->middleware('auth');
-Route::get('/convocatorias/edit/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'edit'])->name('convocatoria.edit')->middleware('auth');
 // actuaciones
 Route::get('/actuaciones/create', [ActuacionesController::class, 'create'])->name('actuaciones.create')->middleware('auth');
 // Ruta para el formulario
@@ -132,6 +125,7 @@ Route::delete('/convocatoria-empresas/{convocatoria_empresa}', [ConvocatoriasCon
 
 Route::get('/empresa/{token}', [App\Http\Controllers\EmpresaController::class, 'mail'])->name('empresa.mail');
 
+// No sé si esta ruta se usa
 Route::get('/empresa/{token}/unirse-convocatoria/', [\App\Http\Controllers\EmpresaController::class, 'unirseConvocatoria'])->name('unirseConvocatoria');
 
 Route::get('/empresa/seguimiento/{token}', [App\Http\Controllers\EmpresaController::class, 'mailSeguimiento'])->name('empresa.mail_seguimiento');
@@ -165,8 +159,6 @@ Route::post('/alumnado/{token}/empresa/{empresa}/form/', [\App\Http\Controllers\
 Route::view('/menuInformes', 'menuInformes');
 
 // para el manejo de informes PDF del alumnado
-use App\Http\Controllers\FileController;
-
 Route::get('/file', [FileController::class, 'index'])->name('file');
 Route::post('/file', [FileController::class, 'store'])->name('file.store');
 
@@ -209,3 +201,19 @@ Route::get('/enviar-correo-pdf-empresa/{empresaId}', [MailController::class, 'en
     ->name('enviar-correo-pdf-empresa');
 Route::get('/enviar-correo-pdf-alumno/{alumnoId}', [MailController::class, 'enviarCorreoPdfAlumno'])
     ->name('enviar-correo-pdf-alumno');
+
+// Rutas de convocatorias
+Route::resource('convocatorias', ConvocatoriasController::class)->middleware('auth');
+Route::get('/convocatorias/create', [App\Http\Controllers\ConvocatoriasController::class, 'create'])->name('convocatoria.create')->middleware('auth');
+Route::post('/convocatorias', [App\Http\Controllers\ConvocatoriasController::class, 'store'])->name('convocatoria.store')->middleware('auth');
+Route::get('/convocatorias/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'show'])->name('convocatoria.show')->middleware('auth');
+Route::get('/convocatorias/edit/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'edit'])->name('convocatoria.edit')->middleware('auth');
+
+// Rutas de alumnado
+Route::get('/alumnado', [App\Http\Controllers\AlumnadoController::class, 'index'])->name('alumnado')->middleware('auth');
+Route::post('/alumnados/import', [AlumnadoController::class, 'import'])->name('alumnados.import')->middleware('auth');
+Route::post('/alumnados/uploadImages', [AlumnadoController::class, 'uploadImages'])->name('alumnados.uploadImages')->middleware('auth');
+
+// Rutas de empresa
+Route::get('/empresas/addToConvocatoria/{empresa}', [App\Http\Controllers\EmpresaController::class, 'unirseConvocatoriaForm'])->name('empresas.addConvocatoria')->middleware('auth');
+Route::post('/empresas/addToConvocatoria/{empresa}', [App\Http\Controllers\EmpresaController::class, 'unirseConvocatoriaBoton'])->name('empresa.unirseConvocatoria')->middleware('auth');
