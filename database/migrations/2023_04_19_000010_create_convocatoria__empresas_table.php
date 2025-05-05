@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Crear la tabla convocatoria_empresas
-        Schema::create('convocatoria_empresas', function (Blueprint $table) {
+        Schema::create('convocatoria_empresa', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('convocatoria_id');
             $table->unsignedBigInteger('empresa_id');
-            $table->string('tareas_a_realizar', 255)->nullable();
-            $table->string('perfil_requerido', 255)->nullable();
-            $table->foreign('convocatoria_id')->references('id')->on('convocatorias')->onUpdate('cascade')->onDelete('restrict');
+            $table->unsignedBigInteger('convocatoria_id');
             $table->foreign('empresa_id')->references('id')->on('empresas')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('convocatoria_id')->references('id')->on('convocatorias')->onUpdate('cascade')->onDelete('restrict');
+            $table->integer('numero_alumnos')->nullable();
+            $table->string('tareas_a_realizar')->nullable();
+            $table->string('perfil_requerido')->nullable();
             $table->timestamps();
         });
     }
@@ -29,7 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Eliminar la tabla convocatoria_empresas
-        Schema::dropIfExists('convocatoria_empresas');
+        Schema::dropIfExists('convocatoria_empresa');
     }
 };

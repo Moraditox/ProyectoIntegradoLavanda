@@ -87,10 +87,6 @@
                                                     data-target="#confirmModal{{ $empresa->id }}">
                                                     <i class="fa fa-fw fa-trash"></i> {{ __('Borrar') }}
                                                 </button>
-                                                <a class="btn btn-sm btn-success"
-                                                    href="{{ route('empresas.addConvocatoria', $empresa->id) }}">
-                                                    <i class="fa fa-fw fa-edit"></i> {{ __('Añadir a convocatoria') }}
-                                                </a>
                                                 <!-- Modal de confirmación eliminación -->
                                                 <div class="modal fade" id="confirmModal{{ $empresa->id }}" tabindex="-1"
                                                     role="dialog" aria-labelledby="confirmModalLabel{{ $empresa->id }}"
