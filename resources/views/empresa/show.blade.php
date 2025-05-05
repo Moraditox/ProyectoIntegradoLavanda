@@ -21,21 +21,21 @@
         <h4>Valoración global por parte del profesorado: {{ $mediaInformesProfesorado }}</h4>
     </div>
     <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" id="empleados-tab" data-toggle="tab" href="#empleados">Empleados</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">FCT</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="evaluacion-tab" data-toggle="tab" href="#evaluacion">Evaluación</a>
-        </li>
-        <li class="nav-item">
+    <li class="nav-item">
             <a class="nav-link" id="informacion-empresa-tab" data-toggle="tab" href="#informacion-empresa">Información
                 de la Empresa</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" id="empleados-tab" data-toggle="tab" href="#empleados">Empleados</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">DUAL</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" id="actuacion-empresa-tab" data-toggle="tab" href="#actuacion-empresa">Actuaciones</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="evaluacion-tab" data-toggle="tab" href="#evaluacion">Evaluación</a>
         </li>
     </ul>
 
@@ -245,7 +245,6 @@
                     <th>Profesor Encargado</th>
                     <th>Fecha</th>
                     <th>Descripción</th>
-                    <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -260,13 +259,6 @@
                     </td>
                     <td>{{ $actuacion->created_at }}</td>
                     <td>{{ $actuacion->descripcion }}</td>
-                    <td>
-                        Hola
-                        @csrf
-                        @method('DELETE')
-                        <!-- <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar esta actuación?')">Eliminar</button> -->
-                        </form>
-                    </td>
                     </tr>
                     @endforeach
                 </tbody>
