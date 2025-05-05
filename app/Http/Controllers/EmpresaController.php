@@ -513,5 +513,66 @@ class EmpresaController extends Controller
         return view('alumnadoVistaMail');
     }
 
+    // Método que devuelve el formulario para unir una empresa a una convocatoria
+    public function unirseConvocatoriaForm($id)
+    {
+        /**
+         * Propuesta
+         * Deshabilitar las convocatorias a las que la empresa ya pertenece
+         */
+        $empresa = Empresa::find($id);
+        if (!$empresa) {
+            abort(404);
+        }
 
+        // Recuperamos todas las convcocatorias del curso actual
+        // *** SIN IMPLEMENTAR ***
+        $convocatorias = Convocatorias::all();
+
+        // Recuperamos a los profesores y alumnos relacionados al año academico actual
+        // *** SIN IMPLEMENTAR ***
+        $alumnos = Alumnado::all();
+        $profesores = DB::table('profesores')->get();
+
+        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatorias', 'alumnos', 'profesores'));
+    }
+
+    // Método que recoge los datos del formulario para unir una empresa a una convocatoria
+    // Este método de unirse a la convocatoria se llama desde la pestaña de empresas
+    public function unirseConvocatoriaBoton(Request $request, $id)
+    {
+        $empresa = Empresa::find($id);
+        if (!$empresa) {
+            abort(404);
+        }
+
+        // Validar los datos del formulario
+        $request->validate([
+            'convocatoria_id' => 'required|exists:convocatorias,id',
+            'referente_id' => 'required|integer|min:1',
+            'tareas_a_realizar' => 'string|max:255',
+            'perfil_requerido' => 'string|max:255',
+        ]);
+        
+        $referenteId = $request->input('referente_id');
+        
+        $existsInAlumnado = \DB::table('alumnado')->where('id', $referenteId)->exists();
+        $existsInProfesores = \DB::table('profesores')->where('id', $referenteId)->exists();
+        
+        if (!($existsInAlumnado || $existsInProfesores)) {
+            return back()->withErrors(['referente_id' => 'El referente_id debe existir en alumnado o profesores.']);
+        }
+
+        // Guardar la relación entre la empresa y la convocatoria
+        $convocatoria_empresa = new Convocatoria_Empresa();
+        $convocatoria_empresa->convocatoria_id = $request->input('convocatoria_id');
+        $convocatoria_empresa->empresa_id = $empresa->id;
+        // $convocatoria_empresa->referente_id = $request->input('referente_id');
+        $convocatoria_empresa->tareas_a_realizar = $request->input('tareas_a_realizar');
+        $convocatoria_empresa->perfil_requerido = $request->input('perfil_requerido');
+        $convocatoria_empresa->save();
+
+        return redirect()->route('empresas.index')
+            ->with('success', 'La empresa ha sido añadida correctamente a la convocatoria.');
+    }
 }
