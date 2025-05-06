@@ -61,9 +61,6 @@ class ProfesoradoController extends Controller
             $profesor->apellido2 = $fila['apellido2'];
             $profesor->nombre = $fila['nombre'];
             $profesor->email = $fila['email'];
-            $profesor->movil = $fila['movil'];
-            $profesor->imagen = $fila['email'] . '.jpg';
-            $profesor->horas_segundo = $fila['horas_segundo'];
             $profesor->save();
 
             // Añadir a la tabla users
