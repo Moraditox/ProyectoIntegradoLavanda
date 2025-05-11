@@ -58,7 +58,8 @@
             </div>
             {!! $errors->first('curso_academico', '<div class="invalid-feedback">:message</div>') !!}
         </div>
-        <div class="form-group">
+        {{-- Este es el campo para añadir empresas --}}
+        {{-- <div class="form-group">
             {{ Form::label('empresas[]', 'Empresas', ['class' => 'mb-2']) }}
             <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
                 <select class="form-control select2" name="empresas[]" multiple>
@@ -79,7 +80,7 @@
                 </select>
             </div>
             {!! $errors->first('empresas', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
+        </div> --}}
         <script>
             $(document).ready(function() {
                 $('.select2').select2({

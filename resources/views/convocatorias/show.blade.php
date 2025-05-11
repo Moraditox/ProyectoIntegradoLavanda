@@ -55,6 +55,9 @@
 							<li class="nav-item">
 								<a class="nav-link" id="empresas-tab" data-toggle="tab" href="#empresas">Empresas</a>
 							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="plazas-tab" data-toggle="tab" href="#plazas">Plazas</a>
+							</li>
 						</ul>
 
 						    <div class="tab-content">
@@ -157,8 +160,13 @@
 							</div>
 
 							<div class="tab-pane fade" id="empresas">
-								<!-- Agregar el formulario de búsqueda -->
+								@if($convocatoria_empresas->isEmpty())
+									<div class="text-center mt-4">
+										<a href="{{ url('empresas') }}" class="btn btn-primary">Añadir Empresa</a>
+									</div>
+								@else
 								<br>
+
 								<form action="{{ route('empresa.indexConvocatoria') }}" method="GET" class="form-inline">
 									<div class="input-group w-100">
 										<input type="text" class="form-control mr-2" name="search" id="search" placeholder="Buscar empresas">
@@ -168,14 +176,16 @@
 									</div>
 								</form>
 
-								<!-- <button style="margin:20px;padding:10px;font-size:15px;width:300px">Añadir empresa a convocatoria</button> -->
 								<table class="table mt-4">
 									<thead>
 										<tr>
 											<th>Empresa</th>
 											<th>Contacto</th>
+											<th>Alumno de contacto</th>
+											<th>Profesor de contacto</th>
 											<th>Teléfono</th>
 											<th>Email</th>
+											<th>Observaciones
 											<th>Participación</th>
 											<th>Acciones</th>
 										</tr>
@@ -185,8 +195,11 @@
 										<tr>
 											<td>{{ $empresa->nombre}}</td>
 											<td>{{ $empresa->persona_contacto}}</td>
+											<td>{{ $empresa->alumno_contacto ?? 'No asignado' }}</td>
+											<td>{{ $empresa->profesor_contacto ?? 'No asignado' }}</td>
 											<td>{{ $empresa->telefono_contacto}}</td>
 											<td>{{ $empresa->correo_contacto}}</td>
+											<td>{{ $convocatoria_empresa->observaciones}}</td>
 											<td>
 												<form action="{{ route('enviar-correo-participar', ['empresa' => $empresa->id, 'convocatoria' => $convocatoria->id]) }}" method="POST" id="participarForm-{{ $empresa->id }}">
 													@csrf
@@ -217,8 +230,8 @@
 											</div>
 											<td>
 												<button type="button" class="btn btn-primary btn-sm btn-ver-detalles" title="Ver detalles participación" data-toggle="modal" data-target="#modalPlazas{{ $empresa->id }}" data-nombre-empresa="{{ $empresa->nombre }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </button> @foreach ($convocatoriaEmpresaPlazas as $plaza)
+													<i class="fas fa-eye"></i>
+												</button> @foreach ($convocatoriaEmpresaPlazas as $plaza)
 												<!-- Modal -->
 												<div class="modal fade" id="modalPlazas{{ $empresa->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 													<div class="modal-dialog" role="document">
@@ -226,8 +239,8 @@
 															<div class="modal-header">
 																<h5 class="modal-title" id="exampleModalLabel">Detalle de Todas las Plazas</h5>
 																<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
+																<span aria-hidden="true">&times;</span>
+															</button>
 															</div>
 															<div class="modal-body">
 																<p><strong>Nombre empresa:</strong> {{ $empresa->nombre }}</p>
@@ -253,8 +266,8 @@
 													<i class="fa fa-fw fa-edit"></i>
 												</a>
 												<button type="button" class="btn btn-sm btn-danger" title="Eliminar de la convocatoria" data-toggle="modal" data-target="#confirmModal{{ $convocatoria_empresa->id }}">
-                                                <i class="fa fa-fw fa-trash"></i>
-                                            </button>
+												<i class="fa fa-fw fa-trash"></i>
+											</button>
 
 												<div class="modal fade" id="confirmModal{{ $convocatoria_empresa->id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel{{ $convocatoria_empresa->id }}" aria-hidden="true">
 													<div class="modal-dialog" role="document">
@@ -262,8 +275,8 @@
 															<div class="modal-header">
 																<h5 class="modal-title" id="confirmModalLabel{{ $convocatoria_empresa->id }}">Confirmar Eliminación</h5>
 																<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
+																	<span aria-hidden="true">&times;</span>
+																</button>
 															</div>
 															<div class="modal-body">
 																¿Estás seguro de que quieres eliminar la empresa de la convocatoria?
@@ -282,7 +295,41 @@
 										@endforeach
 									</tbody>
 								</table>
-								</div>
+								@endif
+							</div>
+
+							<div class="tab-pane fade" id="plazas">
+								@foreach($convocatoria_empresas as $convocatoria_empresa)
+									@php 
+										$empresa = $convocatoria_empresa->empresa; 
+										$plazas = $convocatoria_empresa->ofertaPlazas;
+									@endphp
+									<div class="card mb-3">
+										<div class="card-header">
+											<h5>{{ $empresa->nombre }}</h5>
+										</div>
+										<div class="card-body">
+											<table class="table">
+												<thead>
+													<tr>
+														<th>Especialidad</th>
+														<th>Plazas</th>
+														<th>Observaciones</th>
+													</tr>
+												</thead>
+												<tbody>
+													@foreach($plazas as $plaza)
+													<tr>
+														<td>{{ $plaza->especialidad }}</td>
+														<td>{{ $plaza->plazas }}</td>
+														<td>{{ $plaza->observaciones }}</td>
+													</tr>
+													@endforeach
+												</tbody>
+											</table>
+										</div>
+									</div>
+								@endforeach
 							</div>
 					</div>
 				</div>

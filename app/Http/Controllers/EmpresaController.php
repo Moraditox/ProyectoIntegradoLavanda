@@ -14,6 +14,7 @@ use App\Models\Convocatorias;
 use App\Models\InformesAlumnado;
 use App\Models\InformesProfesorado;
 use App\Models\Formulario_Seguimiento_Empresa;
+use App\Models\OfertaPlaza;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -533,6 +534,7 @@ class EmpresaController extends Controller
 
     // Método que recoge los datos del formulario para unir una empresa a una convocatoria
     // Este método de unirse a la convocatoria se llama desde la pestaña de empresas
+    // Además asigna plazas a la empresa en la convocatoria
     public function unirseConvocatoriaBoton(Request $request, $id)
     {
         $empresa = Empresa::find($id);
@@ -543,28 +545,31 @@ class EmpresaController extends Controller
         // Validar los datos del formulario
         $request->validate([
             'convocatoria_id' => 'required|exists:convocatorias,id',
-            'referente_id' => 'required|integer|min:1',
-            'tareas_a_realizar' => 'string|max:255',
-            'perfil_requerido' => 'string|max:255',
+            'alumno_id' => 'nullable|exists:alumnado,id',
+            'profesor_id' => 'nullable|exists:profesores,id',
+            'observaciones' => 'nullable|string'
         ]);
-        
-        $referenteId = $request->input('referente_id');
-        
-        $existsInAlumnado = \DB::table('alumnado')->where('id', $referenteId)->exists();
-        $existsInProfesores = \DB::table('profesores')->where('id', $referenteId)->exists();
-        
-        if (!($existsInAlumnado || $existsInProfesores)) {
-            return back()->withErrors(['referente_id' => 'El referente_id debe existir en alumnado o profesores.']);
-        }
 
         // Guardar la relación entre la empresa y la convocatoria
         $convocatoria_empresa = new Convocatoria_Empresa();
         $convocatoria_empresa->convocatoria_id = $request->input('convocatoria_id');
         $convocatoria_empresa->empresa_id = $empresa->id;
-        // $convocatoria_empresa->referente_id = $request->input('referente_id');
-        $convocatoria_empresa->tareas_a_realizar = $request->input('tareas_a_realizar');
-        $convocatoria_empresa->perfil_requerido = $request->input('perfil_requerido');
+        $convocatoria_empresa->alumno_referencia_id = $request->input('alumno_referencia_id');
+        $convocatoria_empresa->profesor_referencia_id = $request->input('profesor_referencia_id');
+        $convocatoria_empresa->observaciones = $request->input('observaciones');
         $convocatoria_empresa->save();
+
+        // Asignamos las plazas a la empresa en la convocatoria
+        // Recorremos el apartado de especialidades del request y guardamos cada una de ellas
+        $especialidades = $request->input('especialidades');
+        foreach ($especialidades as $especialidad) {
+            OfertaPlaza::create([
+                'relacion_convocatoria_empresa_id' => $convocatoria_empresa->id,
+                'especialidad' => $especialidad['nombre'],
+                'plazas' => $especialidad['plazas'],
+                'observaciones' => $especialidad['observaciones']
+            ]);
+        }
 
         return redirect()->route('empresas.index')
             ->with('success', 'La empresa ha sido añadida correctamente a la convocatoria.');
