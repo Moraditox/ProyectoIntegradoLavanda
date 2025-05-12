@@ -16,10 +16,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('convocatoria_id');
             $table->unsignedBigInteger('empresa_id');
-            $table->string('tareas_a_realizar', 255)->nullable();
-            $table->string('perfil_requerido', 255)->nullable();
+            $table->unsignedBigInteger('alumno_referencia_id')->nullable();
+            $table->unsignedBigInteger('profesor_referencia_id')->nullable();
+            $table->text('observaciones')->nullable();
             $table->foreign('convocatoria_id')->references('id')->on('convocatorias')->onUpdate('cascade')->onDelete('restrict');
             $table->foreign('empresa_id')->references('id')->on('empresas')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('alumno_referencia_id')->references('id')->on('alumnado')->onUpdate('cascade')->onDelete('set null');
+            $table->foreign('profesor_referencia_id')->references('id')->on('profesorado')->onUpdate('cascade')->onDelete('set null');
             $table->timestamps();
         });
     }
