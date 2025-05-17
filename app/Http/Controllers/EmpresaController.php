@@ -511,25 +511,29 @@ class EmpresaController extends Controller
     // Método que devuelve el formulario para unir una empresa a una convocatoria
     public function unirseConvocatoriaForm($id)
     {
-        /**
-         * Propuesta
-         * Deshabilitar las convocatorias a las que la empresa ya pertenece
-         */
         $empresa = Empresa::find($id);
         if (!$empresa) {
             abort(404);
         }
 
-        // Recuperamos todas las convcocatorias del curso actual
-        // *** SIN IMPLEMENTAR ***
-        $convocatorias = Convocatorias::all();
+        // Recuperamos la convocatoria que esté en estado Preparación
+        $convocatorias = DB::table('convocatorias')
+            ->where('estado', 'Preparación')
+            ->get();
 
-        // Recuperamos a los profesores y alumnos relacionados al año academico actual
+        // Recuperamos a los profesores y alumnos relacionados al la convocatoria seleccionada
         // *** SIN IMPLEMENTAR ***
         $alumnos = Alumnado::all();
         $profesores = DB::table('profesores')->get();
 
-        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatorias', 'alumnos', 'profesores'));
+        // Recuperamos las especialidades de la empresa
+        $especialidades = DB::table('ciclos_disponibles')
+            ->pluck('especialidad')
+            ->unique()
+            ->values()
+            ->all();
+
+        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatorias', 'alumnos', 'profesores', 'especialidades'));
     }
 
     // Método que recoge los datos del formulario para unir una empresa a una convocatoria
@@ -540,6 +544,25 @@ class EmpresaController extends Controller
         $empresa = Empresa::find($id);
         if (!$empresa) {
             abort(404);
+        }
+
+        // Añadir validación para comprobar si la empresa ya está unida a la convocatoria
+        $convocatoria_empresa = Convocatoria_Empresa::where('empresa_id', $empresa->id)
+            ->where('convocatoria_id', $request->input('convocatoria_id'))
+            ->first();
+
+        if ($convocatoria_empresa) {
+            return redirect()->back()->withInput()->with('error', 'La empresa ya está unida a esta convocatoria.');
+        }
+
+        // Comprobamos que las especialidades no se hayan repetido
+        $especialidades = $request->input('especialidades');
+        $especialidadesUnicas = [];
+        foreach ($especialidades as $especialidad) {
+            if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
+                return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+            }
+            $especialidadesUnicas[] = $especialidad['nombre'];
         }
 
         // Validar los datos del formulario
@@ -558,7 +581,7 @@ class EmpresaController extends Controller
         $convocatoria_empresa->profesor_referencia_id = $request->input('profesor_referencia_id');
         $convocatoria_empresa->observaciones = $request->input('observaciones');
         $convocatoria_empresa->save();
-
+        
         // Asignamos las plazas a la empresa en la convocatoria
         // Recorremos el apartado de especialidades del request y guardamos cada una de ellas
         $especialidades = $request->input('especialidades');
@@ -567,7 +590,9 @@ class EmpresaController extends Controller
                 'relacion_convocatoria_empresa_id' => $convocatoria_empresa->id,
                 'especialidad' => $especialidad['nombre'],
                 'plazas' => $especialidad['plazas'],
-                'observaciones' => $especialidad['observaciones']
+                'observaciones' => $especialidad['observaciones'],
+                'perfil' => $especialidad['perfil'],
+                'tareas' => $especialidad['tareas']
             ]);
         }
 

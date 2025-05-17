@@ -208,6 +208,8 @@ Route::get('/convocatorias/create', [App\Http\Controllers\ConvocatoriasControlle
 Route::post('/convocatorias', [App\Http\Controllers\ConvocatoriasController::class, 'store'])->name('convocatoria.store')->middleware('auth');
 Route::get('/convocatorias/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'show'])->name('convocatoria.show')->middleware('auth');
 Route::get('/convocatorias/edit/{convocatoria}', [App\Http\Controllers\ConvocatoriasController::class, 'edit'])->name('convocatoria.edit')->middleware('auth');
+Route::get('/convocatorias/editEmpresa/{convocatoria}/{empresa}', [App\Http\Controllers\ConvocatoriasController::class, 'editEmpresa'])->name('convocatoria.editEmpresa')->middleware('auth');
+Route::post('/convocatorias/editEmpresa/{convocatoria}/{empresa}', [App\Http\Controllers\ConvocatoriasController::class, 'updateEmpresa'])->name('convocatoria.updateEmpresa')->middleware('auth');
 
 // Rutas de alumnado
 Route::get('/alumnado', [App\Http\Controllers\AlumnadoController::class, 'index'])->name('alumnado')->middleware('auth');

@@ -262,7 +262,7 @@
 												@endforeach
 
 
-												<a class="btn btn-sm btn-success" title="Editar" href="{{ route('empresas.edit', $empresa->id) }}">
+												<a class="btn btn-sm btn-success" title="Editar" href="{{ route('convocatoria.editEmpresa', [$convocatoria->id, $empresa->id]) }}">
 													<i class="fa fa-fw fa-edit"></i>
 												</a>
 												<button type="button" class="btn btn-sm btn-danger" title="Eliminar de la convocatoria" data-toggle="modal" data-target="#confirmModal{{ $convocatoria_empresa->id }}">
@@ -314,6 +314,8 @@
 													<tr>
 														<th>Especialidad</th>
 														<th>Plazas</th>
+														<th>Perfil</th>
+														<th>Tareas</th>
 														<th>Observaciones</th>
 													</tr>
 												</thead>
@@ -322,6 +324,8 @@
 													<tr>
 														<td>{{ $plaza->especialidad }}</td>
 														<td>{{ $plaza->plazas }}</td>
+														<td>{{ $plaza->perfil }}</td>
+														<td>{{ $plaza->tareas }}</td>
 														<td>{{ $plaza->observaciones }}</td>
 													</tr>
 													@endforeach
