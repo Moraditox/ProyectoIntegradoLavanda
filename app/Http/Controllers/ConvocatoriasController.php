@@ -84,10 +84,6 @@ class ConvocatoriasController extends Controller
              ->orderBy('ciclos.ciclo')
              ->orderBy('alumnado.apellido1')->get();
 
-        if ($matriculas->isEmpty()) {
-            return redirect()->back()->with('error', 'No hay alumnos matriculados en esta convocatoria.');
-        }
-
         $profesores = Profesores::all();
 
         return view('convocatorias.show', compact('convocatoriaEmpresaPlazas', 'empresasDisponibles', 'convocatoria', 'convocatoria_cursos', 'convocatoria_empresas', 'actuaciones', 'matriculas', 'cursosUnicos', 'profesores', 'empresaId'));
@@ -307,7 +303,7 @@ class ConvocatoriasController extends Controller
         $convocatoria->convocatoria_cursos()->saveMany($convocatoria_cursos);
 
         $empresas = $request->input('empresas');
-        $convocatoria->convocatoria_empresas()->delete();
+        // $convocatoria->convocatoria_empresas()->delete();
         $convocatoria_empresas = [];
 
         if ($empresas != null) {
@@ -318,7 +314,11 @@ class ConvocatoriasController extends Controller
                 $convocatoria_empresas[] = $convocatoria_empresa;
             }
         }
-        $convocatoria->convocatoria_empresas()->saveMany($convocatoria_empresas);
+
+        // $convocatoria->convocatoria_empresas()->saveMany($convocatoria_empresas);
+        // Modifica el estado de la convocatoria según el input
+        $convocatoria->estado = $request->input('estado');
+        $convocatoria->save();
 
         return redirect()->route('convocatorias.index')
             ->with('success', 'La convocatoria ha sido actualizada correctamente.');

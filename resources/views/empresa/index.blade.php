@@ -80,12 +80,12 @@
                                                 <a class="btn btn-sm btn-success" href="{{ route('empresas.edit', $empresa->id) }}" title="Editar">
                                                     <i class="fa fa-fw fa-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal{{ $empresa->id }}" title="Borrar">
-                                                    <i class="fa fa-fw fa-trash"></i>
-                                                </button>
                                                 <a class="btn btn-sm btn-info" href="{{ route('empresas.addConvocatoria', $empresa->id) }}" title="Añadir a convocatoria">
                                                     <i class="fa fa-fw fa-plus"></i>
                                                 </a>
+                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal{{ $empresa->id }}" title="Borrar">
+                                                    <i class="fa fa-fw fa-trash"></i>
+                                                </button>
                                                 <!-- Modal de confirmación eliminación -->
                                                 <div class="modal fade" id="confirmModal{{ $empresa->id }}" tabindex="-1"
                                                     role="dialog" aria-labelledby="confirmModalLabel{{ $empresa->id }}"

@@ -58,6 +58,16 @@
             </div>
             {!! $errors->first('curso_academico', '<div class="invalid-feedback">:message</div>') !!}
         </div>
+        <div class="form-group">
+            {{ Form::label('estado', 'Estado') }}
+            <select class="form-control select2" name="estado">
+                <option value="" disabled {{ empty($convocatoria->estado) ? 'selected' : '' }}>Selecciona el estado</option>
+                <option value="Activa" {{ (old('estado', $convocatoria->estado) == 'Activa') ? 'selected' : '' }}>Activa</option>
+                <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación') ? 'selected' : '' }}>Preparación</option>
+                <option value="Terminada" {{ (old('estado', $convocatoria->estado) == 'Terminada') ? 'selected' : '' }}>Terminada</option>
+            </select>
+            {!! $errors->first('estado', '<div class="invalid-feedback">:message</div>') !!}
+        </div>
         {{-- Este es el campo para añadir empresas --}}
         {{-- <div class="form-group">
             {{ Form::label('empresas[]', 'Empresas', ['class' => 'mb-2']) }}

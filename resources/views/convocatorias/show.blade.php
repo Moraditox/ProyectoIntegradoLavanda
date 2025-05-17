@@ -92,30 +92,49 @@
 										</tr>
 									</thead>
 									<tbody>
-										@foreach($matriculas as $matricula) @php $empresa = optional($matricula->alumnado->asignaciones)->empresa; $alumno = $matricula->alumnado; $rutaAlumno = route('alumnos.infoAlumno', $alumno->id); @endphp
-										<tr class="matricula-row {{ empty(optional($matricula->alumnado->asignaciones)->empresa) ? 'sin-empresa' : '' }} {{ empty(optional($matricula->alumnado->asignaciones)->profesor) ? 'sin-profesor' : '' }}" data-matricula-id="{{$matricula->id}}">
-											<td style="width:250px">
-												<a href="{{ $rutaAlumno }}" class="enlace-alumno {{ (empty(optional($matricula->alumnado->asignaciones)->empresa) || empty(optional($matricula->alumnado->asignaciones)->profesor)) ? 'text-danger' : '' }}">{{ $alumno->apellido1 }} {{ $alumno->apellido2 }} {{ $alumno->nombre }}</a>
-											</td>
-											<td>{{ $matricula->curso_academico->ciclo }}</td>
-											<td>
-												@php $asignacionEmpresa = optional($matricula->alumnado->asignaciones)->empresa; @endphp @if($asignacionEmpresa) {{ $asignacionEmpresa->nombre }} @else Sin asignación de empresa @endif
-											</td>
-											<td>
-												@php $asignacionProfesor = optional($matricula->alumnado->asignaciones)->profesor; @endphp @if($asignacionProfesor) {{ $asignacionProfesor->nombre }} {{ $asignacionProfesor->apellido1 }} @else Sin asignación de profesor @endif
-											</td>
-											<td>
-												<button class="btn btn-success btn-sm editarEmpresaBtn" data-alumnado-id="{{ $matricula->alumnado->id }}" data-toggle="modal" data-target="#editarEmpresaModal">
-                                                    Asignar/Editar
-                                                </button>
-												<button class="btn btn-primary btn-sm informesBtn" data-alumno-id="{{ $alumno->id }}" data-toggle="modal" data-target="#informesModal">
-                                                    Informes
-                                                </button>
-                                                
-
-											</td>
-										</tr>
-										@endforeach
+										@if($matriculas->isEmpty())
+											<tr>
+												<td colspan="5" class="text-center">No hay alumnos asociados a esta convocatoria.</td>
+											</tr>
+										@else
+											@foreach($matriculas as $matricula) 
+												@php 
+													$empresa = optional($matricula->alumnado->asignaciones)->empresa; 
+													$alumno = $matricula->alumnado; 
+													$rutaAlumno = route('alumnos.infoAlumno', $alumno->id); 
+												@endphp
+												<tr class="matricula-row {{ empty(optional($matricula->alumnado->asignaciones)->empresa) ? 'sin-empresa' : '' }} {{ empty(optional($matricula->alumnado->asignaciones)->profesor) ? 'sin-profesor' : '' }}" data-matricula-id="{{$matricula->id}}">
+													<td style="width:250px">
+														<a href="{{ $rutaAlumno }}" class="enlace-alumno {{ (empty(optional($matricula->alumnado->asignaciones)->empresa) || empty(optional($matricula->alumnado->asignaciones)->profesor)) ? 'text-danger' : '' }}">{{ $alumno->apellido1 }} {{ $alumno->apellido2 }} {{ $alumno->nombre }}</a>
+													</td>
+													<td>{{ $matricula->curso_academico->ciclo }}</td>
+													<td>
+														@php $asignacionEmpresa = optional($matricula->alumnado->asignaciones)->empresa; @endphp 
+														@if($asignacionEmpresa) 
+															{{ $asignacionEmpresa->nombre }} 
+														@else 
+															Sin asignación de empresa 
+														@endif
+													</td>
+													<td>
+														@php $asignacionProfesor = optional($matricula->alumnado->asignaciones)->profesor; @endphp 
+														@if($asignacionProfesor) 
+															{{ $asignacionProfesor->nombre }} {{ $asignacionProfesor->apellido1 }} 
+														@else 
+															Sin asignación de profesor 
+														@endif
+													</td>
+													<td>
+														<button class="btn btn-success btn-sm editarEmpresaBtn" data-alumnado-id="{{ $matricula->alumnado->id }}" data-toggle="modal" data-target="#editarEmpresaModal">
+															Asignar/Editar
+														</button>
+														<button class="btn btn-primary btn-sm informesBtn" data-alumno-id="{{ $alumno->id }}" data-toggle="modal" data-target="#informesModal">
+															Informes
+														</button>
+													</td>
+												</tr>
+											@endforeach
+										@endif
 									</tbody>
 								</table>
 							</div>
@@ -381,7 +400,8 @@
 </div>
 
 <!-- Scripts -->
-<script>
+{{-- ESTO LO HE COMENTADO PORQUE SI NO HAY MATRICULAS NO DEJA ENTRAR A LA VISTA --}}
+{{-- <script>
 	$(document).ready(function () {
 		        // Función para mostrar el contenido del modal de informes
 		        function mostrarInformes(alumnoId) {
@@ -473,6 +493,7 @@
 		                    </tbody>
 		                </table>
 		            `;
+
 		            // Inserta el contenido en el modal
 		            $('#informesModalContent').html(informesContent);
 		        }
@@ -487,7 +508,7 @@
 		    });
 		
 	
-</script>
+</script> --}}
 
 <script>
 	$(document).ready(function () {
