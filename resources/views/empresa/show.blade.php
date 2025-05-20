@@ -21,18 +21,21 @@
         <h4>Valoración global por parte del profesorado: {{ $mediaInformesProfesorado }}</h4>
     </div>
     <ul class="nav nav-tabs">
+    <li class="nav-item">
+            <a class="nav-link" id="informacion-empresa-tab" data-toggle="tab" href="#informacion-empresa">Información
+                de la Empresa</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link" id="empleados-tab" data-toggle="tab" href="#empleados">Empleados</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">FCT</a>
+            <a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">DUAL</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="actuacion-empresa-tab" data-toggle="tab" href="#actuacion-empresa">Actuaciones</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="evaluacion-tab" data-toggle="tab" href="#evaluacion">Evaluación</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="informacion-empresa-tab" data-toggle="tab" href="#informacion-empresa">Información
-                de la Empresa</a>
         </li>
     </ul>
 
@@ -225,6 +228,44 @@
 
 
 
+        </div>
+
+        <div class="tab-pane fade" id="actuacion-empresa">
+            <div class="card-body">
+            <div class="table-responsive">
+                <div class="alert alert-info"
+                style="display: flex; justify-content: space-between; align-items: center">
+                <span>Puede añadir actuaciones a esta empresa haciendo clic en el botón a continuación:</span>
+                <a href="{{ route('actuaciones-empresa.create', ['empresa_id' => $empresa->id]) }}" class="btn btn-warning">Añadir actuación</a>
+                </div>
+                @if ( isset($actuaciones) && $actuaciones->isNotEmpty())
+                <table class="table table-striped table-hover">
+                <thead class="thead">
+                    <tr>
+                    <th>Profesor Encargado</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($actuaciones as $actuacion)
+                    <tr>
+                    <td>
+                        @if ($actuacion->profesor)
+                        {{ $actuacion->profesor->nombre }} {{ $actuacion->profesor->apellido }}
+                        @else
+                        No hay datos del profesor
+                        @endif
+                    </td>
+                    <td>{{ $actuacion->created_at }}</td>
+                    <td>{{ $actuacion->descripcion }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                </table>
+                @endif
+            </div>
+            </div>
         </div>
     </div>
 

@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('convocatoria_empresa', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('empresa_id');
-            $table->unsignedBigInteger('convocatoria_id');
-            $table->foreign('empresa_id')->references('id')->on('empresas')->onUpdate('cascade')->onDelete('restrict');
+            $table->unsignedBigInteger('alumno_referencia_id')->nullable();
+            $table->unsignedBigInteger('profesor_referencia_id')->nullable();
+            $table->text('observaciones')->nullable();
             $table->foreign('convocatoria_id')->references('id')->on('convocatorias')->onUpdate('cascade')->onDelete('restrict');
-            $table->integer('numero_alumnos')->nullable();
-            $table->string('tareas_a_realizar')->nullable();
-            $table->string('perfil_requerido')->nullable();
+            $table->foreign('empresa_id')->references('id')->on('empresas')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('alumno_referencia_id')->references('id')->on('alumnado')->onUpdate('cascade')->onDelete('set null');
+            $table->foreign('profesor_referencia_id')->references('id')->on('profesorado')->onUpdate('cascade')->onDelete('set null');
             $table->timestamps();
         });
     }

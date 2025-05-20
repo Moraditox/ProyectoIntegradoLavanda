@@ -34,24 +34,39 @@
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #app {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('storage/avatar/iesgrancapitan.png') }}" alt="Logo" style="max-width: 100px;">
-                    {{ config('app.name', 'Lavanda') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm" style="font-size: 1.2rem; display: flex; justify-content: center; align-items: center; width: 100%;">
+            <div class="container d-flex justify-content-center align-items-center max-w-100">
+                <div class="d-flex align-items-center" style="flex-grow: 1;">
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        <img src="{{ asset('storage/avatar/iesgrancapitan.png') }}" alt="Logo" style="max-width: 100px; margin-right: 10px;">
+                        {{ config('app.name', 'Lavanda') }}
+                    </a>
+                </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <div id="navbarSupportedContent">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" href="{{ url('/home') }}">Convocatorias</a>
                         </li>
@@ -76,11 +91,8 @@
                     </ul>
                 </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-                    <!-- Right Side Of Navbar -->
+                <div class="d-flex align-items-center" style="flex-grow: 1;">
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
                         @guest
                             {{-- @if (Route::has('login'))
                                 <li class="nav-item">
@@ -150,7 +162,6 @@
 		</div>
 	</div>
 </div>
-
     <footer class="bg-white border-t border-gray-200">
         <div class="container mx-auto py-4 px-5 flex flex-wrap flex-col sm:flex-row items-center justify-between">
             <p class="text-gray-500 text-sm text-center sm:text-left">&copy; <?php echo date('Y'); ?> Lavanda. Todos los
@@ -161,5 +172,7 @@
         </div>
     </footer>
 </body>
+
+@yield('scripts')
 
 </html>
