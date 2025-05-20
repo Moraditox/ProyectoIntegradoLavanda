@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('relacion_convocatoria_empresa_id');
             $table->string('especialidad');
             $table->integer('plazas');
+            $table->string('perfil');
+            $table->string('Tareas');
             $table->string('observaciones')->nullable();
             $table->foreign('relacion_convocatoria_empresa_id')->references('id')->on('convocatoria_empresas')->onDelete('cascade');
             $table->timestamps();

@@ -34,6 +34,24 @@
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #app {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -144,7 +162,6 @@
 		</div>
 	</div>
 </div>
-
     <footer class="bg-white border-t border-gray-200">
         <div class="container mx-auto py-4 px-5 flex flex-wrap flex-col sm:flex-row items-center justify-between">
             <p class="text-gray-500 text-sm text-center sm:text-left">&copy; <?php echo date('Y'); ?> Lavanda. Todos los
@@ -155,5 +172,7 @@
         </div>
     </footer>
 </body>
+
+@yield('scripts')
 
 </html>

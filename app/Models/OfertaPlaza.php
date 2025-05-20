@@ -16,7 +16,9 @@ class OfertaPlaza extends Model
         'relacion_convocatoria_empresa_id',
         'especialidad',
         'plazas',
-        'observaciones'
+        'observaciones',
+        'perfil',
+        'tareas'
     ];
 
     // Relación 1:N con la tabla convocatoria_empresas
