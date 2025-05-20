@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy over SSH
         run: |
-          ssh -i ~/.ssh/id_ed25519 usuario@cpd.iesgrancapitan.org '
+          ssh -i ~/.ssh/id_ed25519 usuario@cpd.iesgrancapitan.org:9116'
             cd /var/www/html/lavanda &&
             git pull origin main &&
             ./script-de-despliegue.sh'
