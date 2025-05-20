@@ -1,0 +1,31 @@
+name: Deploy via SSH
+
+on:
+  push:
+    branches:
+      
+main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+name: Checkout repo
+    uses: actions/checkout@v3,
+
+    
+name: Set up SSH
+    run: |
+      mkdir -p ~/.ssh
+      echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_25519.pub
+      chmod 600 ~/.ssh/id_25519.pub
+      ssh-keyscan -H cpd.iesgrancapita.org >> ~/.ssh/known_hosts,
+
+    
+name: Deploy over SSH
+    run: |
+      ssh usuario@cpd.iesgrancapita.org '
+        cd /var/www/html/lavanda &&
+        git pull origin main &&./script-de-despliegue.sh'
