@@ -22,7 +22,6 @@ jobs:
 
       - name: Deploy over SSH
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p 9116 usuariossh@cpd.iesgrancapitan.org
-            cd /var/www/html/lavanda &&
-            git pull origin main &&
-            ./script-de-despliegue.sh
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p 9116 usuariossh@cpd.iesgrancapitan.org \
+  "cd /var/www/html/lavanda && git pull origin main && ./script-de-despliegue.sh"
+
