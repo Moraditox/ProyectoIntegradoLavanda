@@ -18,10 +18,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H lavanda.iesgrancapitan.org >> ~/.ssh/known_hosts
+          ssh-keyscan -p 9116 -H cpd.iesgrancapitan.org >> ~/.ssh/known_hosts
 
       - name: Deploy over SSH
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p 9116 usuariossh@cpd.iesgrancapitan.org \
-  "cd /var/www/html/lavanda && git pull origin main && ./script-de-despliegue.sh"
+          "cd /var/www/html/lavanda && git pull origin main && ./script-de-despliegue.sh"
 
