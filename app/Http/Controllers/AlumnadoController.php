@@ -73,13 +73,12 @@ class AlumnadoController extends Controller
         $convocatorias = Convocatorias::all();
 
         // Obtener las matrículas ordenadas alfabéticamente por apellido
-        $matriculas = Matricula::with('alumnado')
-            ->orderBy('apellido1')
+        $alumnos = Alumnado::orderBy('apellido1')
             ->orderBy('apellido2')
             ->orderBy('nombre')
             ->get();
 
-        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'matriculas'));
+        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'alumnos'));
     }
 
 
