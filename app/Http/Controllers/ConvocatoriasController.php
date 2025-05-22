@@ -16,18 +16,12 @@ use App\Models\Convocatoria_Empresa_Plaza;
 use Illuminate\Support\Facades\DB;
 use App\Models\Empresa;
 use App\Mail\mailLavanda;
+use App\Models\Alumnado;
+use App\Models\OfertaPlaza;
 use Illuminate\Support\Facades\Mail;
 
 class ConvocatoriasController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-    }
 
     /**
      * Index
@@ -48,13 +42,6 @@ class ConvocatoriasController extends Controller
 
     public function show(Convocatorias $convocatoria)
     {
-        // ****
-        // $matriculas = Matricula::join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
-        //     ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
-        //     ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')
-        //     ->orderBy('ciclos.ciclo')
-        //     ->orderBy('alumnado.apellido1');
-            // ****
 
         $convocatoria_cursos = Convocatoria_Cursos::where('convocatoria_id', $convocatoria->id)
             ->with('curso_academico')
@@ -71,7 +58,10 @@ class ConvocatoriasController extends Controller
             $query->where('convocatoria_id', $convocatoria->id);
         })->get();
 
-        $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)->get();
+        // $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)->get();
+        $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)
+            ->with(['empresa', 'empresa.convocatorias', 'ofertaPlazas'])
+            ->get();
 
         // Inicializa $empresaId con un valor predeterminado
         $empresaId = null;
@@ -86,7 +76,7 @@ class ConvocatoriasController extends Controller
         $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
         $actuaciones = Actuaciones::all();
        
-
+        // Obtener las matrículas de los alumnos asociados a la convocatoria
         $matriculas = Matricula::with(['alumnado', 'alumnado.asignaciones.empresa'])
             ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
              ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
@@ -168,8 +158,6 @@ class ConvocatoriasController extends Controller
     }
 
 
-
-
     /**
      * Create
      *
@@ -177,6 +165,11 @@ class ConvocatoriasController extends Controller
      */
     public function create()
     {
+        // Comprobamos que no haya ya una convocatoria en estado preparacion
+        $convocatoriaPreparacion = Convocatorias::where('estado', 'Preparacion')->first();
+        if ($convocatoriaPreparacion) {
+            return redirect()->back()->with('error', 'Solo puede haber una convocatoria en estado de preparación.');
+        }
         $convocatoria = new Convocatorias();
         $annos_consulta = DB::table('anno_academico')->orderByDesc('anno')->get();
         $annos = array();
@@ -197,15 +190,27 @@ class ConvocatoriasController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created convocatoria in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * This method validates the incoming request data using the rules defined
+     * in the Convocatorias model. It creates a new convocatoria record, associates
+     * it with the selected academic courses and companies, and saves the relationships
+     * in the database.
+     *
+     * @param \Illuminate\Http\Request $request The incoming HTTP request containing
+     *                                          convocatoria data, selected academic courses,
+     *                                          and optionally associated companies.
+     *
+     * @return \Illuminate\Http\RedirectResponse Redirects to the index route of convocatorias
+     *                                            with a success message upon successful creation.
+     *
+     * @throws \Illuminate\Validation\ValidationException If the validation of the request data fails.
      */
     public function store(Request $request)
     {
         $request->validate(Convocatorias::$rules);
 
+        // Creamos la convocatoria
         $valoresConvocatoria = $request->except('curso_academico', 'empresas');
         $convocatoria = new Convocatorias($valoresConvocatoria);
         $convocatoria->save();
@@ -225,6 +230,8 @@ class ConvocatoriasController extends Controller
                 $convocatoria_empresa = new Convocatoria_Empresa();
                 $convocatoria_empresa->convocatoria_id = $convocatoria->id;
                 $convocatoria_empresa->empresa_id = $empresa;
+                $convocatoria_empresa->tareas_a_realizar = null;
+                $convocatoria_empresa->perfil_requerido = null;
                 $convocatoria_empresa->save();
 
                 $convocatoria_empresas[] = $convocatoria_empresa;
@@ -269,6 +276,7 @@ class ConvocatoriasController extends Controller
         foreach ($convocatoria->convocatoria_empresas as $empresa) {
             $empresasSeleccionadas[] = $empresa->empresa_id;
         }
+        
         return view('convocatorias.edit', compact('convocatoria', 'annos', 'cursos', 'empresas', 'cursosSeleccionados', 'empresasSeleccionadas'));
     }
 
@@ -295,7 +303,7 @@ class ConvocatoriasController extends Controller
         $convocatoria->convocatoria_cursos()->saveMany($convocatoria_cursos);
 
         $empresas = $request->input('empresas');
-        $convocatoria->convocatoria_empresas()->delete();
+        // $convocatoria->convocatoria_empresas()->delete();
         $convocatoria_empresas = [];
 
         if ($empresas != null) {
@@ -306,7 +314,11 @@ class ConvocatoriasController extends Controller
                 $convocatoria_empresas[] = $convocatoria_empresa;
             }
         }
-        $convocatoria->convocatoria_empresas()->saveMany($convocatoria_empresas);
+
+        // $convocatoria->convocatoria_empresas()->saveMany($convocatoria_empresas);
+        // Modifica el estado de la convocatoria según el input
+        $convocatoria->estado = $request->input('estado');
+        $convocatoria->save();
 
         return redirect()->route('convocatorias.index')
             ->with('success', 'La convocatoria ha sido actualizada correctamente.');
@@ -325,5 +337,112 @@ class ConvocatoriasController extends Controller
         return view('verFormulario', compact('formularioDataAlumno', 'formularioDataEmpresa'));
     }
 
+    // Método para editar la empresa de una convocatoria
+    public function editEmpresa(Request $request)
+    {
+        // Recupera los parámetros desde la ruta en lugar del request body
+        $convocatoriaId = $request->route('convocatoria');
+        $empresaId = $request->route('empresa');
 
+        // Busca la relación Convocatoria_Empresa por convocatoria y empresa
+        $convocatoriaEmpresa = Convocatoria_Empresa::where('convocatoria_id', $convocatoriaId)
+            ->where('empresa_id', $empresaId)
+            ->first();
+
+        if (!$convocatoriaEmpresa) {
+            return response()->json(['error' => 'No se encontró la empresa en la convocatoria.'], 404);
+        }
+
+        // Recuperamos la empresa
+        $empresa = Empresa::find($empresaId);
+        if (!$empresa) {
+            return response()->json(['error' => 'No se encontró la empresa.'], 404);
+        }
+
+        $empresa->profesorId = $convocatoriaEmpresa->profesor_referencia_id;
+        $empresa->alumnoId = $convocatoriaEmpresa->alumno_referencia_id;
+        $empresa->observaciones = $convocatoriaEmpresa->observaciones;
+
+        // Recuperamos la convocatoria
+        $convocatorias[] = Convocatorias::find($convocatoriaId);
+        $convocatoria = Convocatorias::find($convocatoriaId);
+
+
+        // Recuperamos las especialidades de la empresa
+        $especialidades = DB::table('ciclos_disponibles')
+            ->pluck('especialidad')
+            ->unique()
+            ->values()
+            ->all();
+
+        // Recuperamos los alumnos y profesores asociados a la convocatoria
+        // SIN IMPLEMENTAR, AHORA MISMO SE SELECCIONAN TODOS 
+        $alumnos = Alumnado::all();
+        $profesores = DB::table('profesores')->get();
+
+        // Recuperamos las plazas asociadas a la empresa en esta convocatoria si es que tiene
+        $plazas = OfertaPlaza::where('relacion_convocatoria_empresa_id', $convocatoriaEmpresa->id)
+            ->with('convocatoriaEmpresa')
+            ->get();
+
+        return view('empresa.editarEmpresaConvocatoriaForm', compact('empresa', 'convocatoria', 'convocatorias', 'alumnos', 'profesores', 'especialidades', 'plazas'));
+    }
+
+    // Método que recibe la request del formulario y actualiza la info de empresa en la convocatoria
+    public function updateEmpresa(Request $request)
+    {
+        $convocatoriaId = $request->route('convocatoria');
+        $empresaId = $request->route('empresa');
+
+        // Validar los datos del formulario
+        $request->validate([
+            'convocatoria_id' => 'required|exists:convocatorias,id',
+            'alumno_referencia_id' => 'nullable|exists:alumnado,id',
+            'profesor_referencia_id' => 'nullable|exists:profesores,id',
+            'observaciones' => 'nullable|string',
+        ]);
+
+        // Comprobar que las especialidades no se repiten
+        $especialidades = $request->input('especialidades');
+        $especialidadesUnicas = [];
+        foreach ($especialidades as $especialidad) {
+            if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
+                return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+            }
+            $especialidadesUnicas[] = $especialidad['nombre'];
+        }
+
+        // Buscar la relación Convocatoria_Empresa
+        $convocatoriaEmpresa = Convocatoria_Empresa::where('convocatoria_id', $convocatoriaId)
+            ->where('empresa_id', $empresaId)
+            ->first();
+
+        if (!$convocatoriaEmpresa) {
+            return redirect()->back()->with('error', 'No se encontró la relación empresa-convocatoria.');
+        }
+
+        // Actualizar los campos de la relación
+        $convocatoriaEmpresa->alumno_referencia_id = $request->input('alumno_referencia_id');
+        $convocatoriaEmpresa->profesor_referencia_id = $request->input('profesor_referencia_id');
+        $convocatoriaEmpresa->observaciones = $request->input('observaciones');
+        $convocatoriaEmpresa->save();
+
+        // Eliminar las plazas anteriores asociadas a esta relación
+        OfertaPlaza::where('relacion_convocatoria_empresa_id', $convocatoriaEmpresa->id)->delete();
+
+        // Crear las nuevas plazas
+        foreach ($especialidades as $especialidad) {
+            OfertaPlaza::create([
+                'relacion_convocatoria_empresa_id' => $convocatoriaEmpresa->id,
+                'especialidad' => $especialidad['nombre'],
+                'plazas' => $especialidad['plazas'],
+                'observaciones' => $especialidad['observaciones'],
+                'perfil' => $especialidad['perfil'],
+                'tareas' => $especialidad['tareas']
+            ]);
+        }
+
+        return redirect()->route('convocatoria.show', ['convocatoria' => $convocatoriaId])
+            ->with('success', 'La información de la empresa en la convocatoria ha sido actualizada correctamente.');
+    }
 }

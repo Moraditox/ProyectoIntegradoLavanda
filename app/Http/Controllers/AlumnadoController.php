@@ -29,42 +29,6 @@ class AlumnadoController extends Controller
     {
     }
 
-    /**
-     * Show the index page.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    // public function index()
-    // {
-    //     $actionImportar = route('alumnados.import');
-    //     $actionImagenes = route('alumnados.uploadImages');
-    //     $cursos = Curso_Academico::all();
-    //     $convocatorias = Convocatorias::all();
-
-    //     // Eager load the curso_academico relationship
-    //     $matriculas = Matricula::with('curso_academico')->get();
-
-    //     return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'matriculas'));
-    // }
-
-    // public function index()
-    // {
-    //     $actionImportar = route('alumnados.import');
-    //     $actionImagenes = route('alumnados.uploadImages');
-    //     $cursos = Curso_Academico::all();
-    //     $convocatorias = Convocatorias::all();
-
-    //     // Obtener las matrículas ordenadas alfabéticamente por apellido
-    //     $matriculas = Matricula::with(['alumnado', 'curso_academico'])
-    //         ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
-    //         ->orderBy('alumnado.apellido1')
-    //         ->orderBy('alumnado.apellido2')
-    //         ->orderBy('alumnado.nombre')
-    //         ->get();
-
-    //     return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'matriculas'));
-    // }
-
     public function index()
     {
         $actionImportar = route('alumnados.import');

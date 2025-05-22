@@ -159,13 +159,19 @@ class MailController extends Controller
 
         return redirect()->back()->with('success', 'Correo enviado a la empresa correctamente.');
     }
+
+    /**
+     * * Enviar correo con PDF a la empresa
+     */
     public function enviarCorreoPdfEmpresa($empresaId)
     {
         $empresa = Empresa::find($empresaId);
+
         if (!$empresa) {
             return redirect()->back()->with('error', 'Empresa no encontrada.');
         }
 
+        // Rutas del archivo PDF
         $pdfFileName = 'InformeTutorLaboral_Rellenable.pdf';
         $pdfFilePath = 'storage/informeRellenable/empresa/' . $pdfFileName;
         $parametros = [
@@ -180,6 +186,9 @@ class MailController extends Controller
         return redirect()->back()->with('success', 'Correo con PDF enviado a la empresa correctamente.');
     }
 
+    /**
+     * * Enviar correo con PDF al alumno
+     */
     public function enviarCorreoPdfAlumno($alumnoId)
     {
         $alumnado = Alumnado::find($alumnoId);
@@ -187,6 +196,7 @@ class MailController extends Controller
             return redirect()->back()->with('error', 'Alumno no encontrado.');
         }
 
+        // Rutas del archivo PDF
         $pdfFileName = 'InformeAlumnado_Rellenable.pdf';
         $pdfFilePath = 'storage/informeRellenable/alumno/' . $pdfFileName;
 

@@ -40,6 +40,8 @@
             <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
                 <select class="form-control select2" name="curso_academico[]" multiple>
                     <option value="" disabled>Selecciona los cursos académicos</option>
+                    {{-- SUGERENCIA: AÑADIR TODOS LOS CURSOS DEL AÑO ACADÉMICO, HACE FALTA HACER CAMBIOS PREVIOS PARA HACER ESTO
+                    CONSULTAR A JESÚS --}}
                     @foreach ($cursos as $cursoValue => $cursoLabel)
                         @php
                         if(isset($cursosSeleccionados)) {
@@ -57,6 +59,17 @@
             {!! $errors->first('curso_academico', '<div class="invalid-feedback">:message</div>') !!}
         </div>
         <div class="form-group">
+            {{ Form::label('estado', 'Estado') }}
+            <select class="form-control select2" name="estado">
+                <option value="" disabled {{ empty($convocatoria->estado) ? 'selected' : '' }}>Selecciona el estado</option>
+                <option value="Activa" {{ (old('estado', $convocatoria->estado) == 'Activa') ? 'selected' : '' }}>Activa</option>
+                <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación') ? 'selected' : '' }}>Preparación</option>
+                <option value="Terminada" {{ (old('estado', $convocatoria->estado) == 'Terminada') ? 'selected' : '' }}>Terminada</option>
+            </select>
+            {!! $errors->first('estado', '<div class="invalid-feedback">:message</div>') !!}
+        </div>
+        {{-- Este es el campo para añadir empresas --}}
+        {{-- <div class="form-group">
             {{ Form::label('empresas[]', 'Empresas', ['class' => 'mb-2']) }}
             <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
                 <select class="form-control select2" name="empresas[]" multiple>
@@ -77,7 +90,7 @@
                 </select>
             </div>
             {!! $errors->first('empresas', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
+        </div> --}}
         <script>
             $(document).ready(function() {
                 $('.select2').select2({

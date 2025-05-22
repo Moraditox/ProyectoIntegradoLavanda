@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actuaciones;
+use App\Models\Actuaciones_Empresa;
 use App\Models\Alumnado;
 use App\Models\Anno_Academico;
 use App\Models\Asignaciones;
@@ -14,6 +15,7 @@ use App\Models\Convocatorias;
 use App\Models\InformesAlumnado;
 use App\Models\InformesProfesorado;
 use App\Models\Formulario_Seguimiento_Empresa;
+use App\Models\OfertaPlaza;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -122,6 +124,8 @@ class EmpresaController extends Controller
 
         $informesAlumnado = InformesAlumnado::where('empresa_id', $empresaId)->get();
         $informesProfesorado = InformesProfesorado::where('empresa_id', $empresaId)->get();
+        $actuaciones = Actuaciones_Empresa::where('id_empresa', $empresaId)->get();
+
         // Media Alumnos
         $mediaPosibilidadesFormativasAlumnado = round($informesAlumnado->avg('posibilidades_formativas'), 1);
         $mediaCumplimientoProgramaAlumnado = round($informesAlumnado->avg('cumplimiento_programa'), 1);
@@ -150,10 +154,12 @@ class EmpresaController extends Controller
             $curso = $alumno->matricula->cursoAcademico->curso ?? 'N/A';
             $ciclo = $alumno->matricula->cursoAcademico->ciclo ?? 'N/A';
 
-            $alumno->curso = $curso;
-            $alumno->ciclo = $ciclo;
-            $alumno->nombre_profesor = optional($profesor)->nombre ?? 'N/A';
+            // $alumno->curso = $curso;
+            // $alumno->ciclo = $ciclo;
+            // $alumno->nombre_profesor = optional($profesor)->nombre ?? 'N/A';
         }
+
+
 
         // Pasar todos los datos necesarios a la vista
         return view('empresa.show', compact(
@@ -162,6 +168,7 @@ class EmpresaController extends Controller
             'alumnosFct',
             'informesAlumnado',
             'informesProfesorado',
+            'actuaciones',
             'mediaInformesAlumnado',
             'mediaInformesProfesorado',
             'mediaPosibilidadesFormativasAlumnado',
@@ -507,5 +514,95 @@ class EmpresaController extends Controller
         return view('alumnadoVistaMail');
     }
 
+    // Método que devuelve el formulario para unir una empresa a una convocatoria
+    public function unirseConvocatoriaForm($id)
+    {
+        $empresa = Empresa::find($id);
+        if (!$empresa) {
+            abort(404);
+        }
 
+        // Recuperamos la convocatoria que esté en estado Preparación
+        $convocatorias = DB::table('convocatorias')
+            ->where('estado', 'Preparación')
+            ->get();
+
+        // Recuperamos a los profesores y alumnos relacionados al la convocatoria seleccionada
+        // *** SIN IMPLEMENTAR ***
+        $alumnos = Alumnado::all();
+        $profesores = DB::table('profesores')->get();
+
+        // Recuperamos las especialidades de la empresa
+        $especialidades = DB::table('ciclos_disponibles')
+            ->pluck('especialidad')
+            ->unique()
+            ->values()
+            ->all();
+
+        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatorias', 'alumnos', 'profesores', 'especialidades'));
+    }
+
+    // Método que recoge los datos del formulario para unir una empresa a una convocatoria
+    // Este método de unirse a la convocatoria se llama desde la pestaña de empresas
+    // Además asigna plazas a la empresa en la convocatoria
+    public function unirseConvocatoriaBoton(Request $request, $id)
+    {
+        $empresa = Empresa::find($id);
+        if (!$empresa) {
+            abort(404);
+        }
+
+        // Añadir validación para comprobar si la empresa ya está unida a la convocatoria
+        $convocatoria_empresa = Convocatoria_Empresa::where('empresa_id', $empresa->id)
+            ->where('convocatoria_id', $request->input('convocatoria_id'))
+            ->first();
+
+        if ($convocatoria_empresa) {
+            return redirect()->back()->withInput()->with('error', 'La empresa ya está unida a esta convocatoria.');
+        }
+
+        // Comprobamos que las especialidades no se hayan repetido
+        $especialidades = $request->input('especialidades');
+        $especialidadesUnicas = [];
+        foreach ($especialidades as $especialidad) {
+            if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
+                return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+            }
+            $especialidadesUnicas[] = $especialidad['nombre'];
+        }
+
+        // Validar los datos del formulario
+        $request->validate([
+            'convocatoria_id' => 'required|exists:convocatorias,id',
+            'alumno_id' => 'nullable|exists:alumnado,id',
+            'profesor_id' => 'nullable|exists:profesores,id',
+            'observaciones' => 'nullable|string'
+        ]);
+
+        // Guardar la relación entre la empresa y la convocatoria
+        $convocatoria_empresa = new Convocatoria_Empresa();
+        $convocatoria_empresa->convocatoria_id = $request->input('convocatoria_id');
+        $convocatoria_empresa->empresa_id = $empresa->id;
+        $convocatoria_empresa->alumno_referencia_id = $request->input('alumno_referencia_id');
+        $convocatoria_empresa->profesor_referencia_id = $request->input('profesor_referencia_id');
+        $convocatoria_empresa->observaciones = $request->input('observaciones');
+        $convocatoria_empresa->save();
+        
+        // Asignamos las plazas a la empresa en la convocatoria
+        // Recorremos el apartado de especialidades del request y guardamos cada una de ellas
+        $especialidades = $request->input('especialidades');
+        foreach ($especialidades as $especialidad) {
+            OfertaPlaza::create([
+                'relacion_convocatoria_empresa_id' => $convocatoria_empresa->id,
+                'especialidad' => $especialidad['nombre'],
+                'plazas' => $especialidad['plazas'],
+                'observaciones' => $especialidad['observaciones'],
+                'perfil' => $especialidad['perfil'],
+                'tareas' => $especialidad['tareas']
+            ]);
+        }
+
+        return redirect()->route('empresas.index')
+            ->with('success', 'La empresa ha sido añadida correctamente a la convocatoria.');
+    }
 }

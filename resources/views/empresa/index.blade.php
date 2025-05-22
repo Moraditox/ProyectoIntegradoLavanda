@@ -74,18 +74,17 @@
                                             <td>{{ $empresa->correo_contacto }}</td>
                                             <td>{{ $empresa->telefono_contacto }}</td>
                                             <td>
-                                                <a class="btn btn-sm btn-primary"
-                                                    href="{{ route('empresas.show', $empresa->id) }}">
-                                                    <i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}
+                                                <a class="btn btn-sm btn-primary" href="{{ route('empresas.show', $empresa->id) }}" title="Ver">
+                                                    <i class="fa fa-fw fa-eye"></i>
                                                 </a>
-                                                <a class="btn btn-sm btn-success"
-                                                    href="{{ route('empresas.edit', $empresa->id) }}">
-                                                    <i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}
+                                                <a class="btn btn-sm btn-success" href="{{ route('empresas.edit', $empresa->id) }}" title="Editar">
+                                                    <i class="fa fa-fw fa-edit"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
-                                                
-                                                    data-target="#confirmModal{{ $empresa->id }}">
-                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Borrar') }}
+                                                <a class="btn btn-sm btn-info" href="{{ route('empresas.addConvocatoria', $empresa->id) }}" title="Añadir a convocatoria">
+                                                    <i class="fa fa-fw fa-plus"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal{{ $empresa->id }}" title="Borrar">
+                                                    <i class="fa fa-fw fa-trash"></i>
                                                 </button>
                                                 <!-- Modal de confirmación eliminación -->
                                                 <div class="modal fade" id="confirmModal{{ $empresa->id }}" tabindex="-1"
@@ -126,24 +125,6 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <!-- <td>
-                                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
-                                                    data-target="#correoInvitacionModal{{ $empresa->id }}">
-                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Enviar') }}
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
-                                                    data-target="#correoSeguimientoModal{{ $empresa->id }}">
-                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Enviar') }}
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
-                                                    data-target="#correoInformeModal{{ $empresa->id }}">
-                                                    <i class="fa fa-fw fa-trash"></i> {{ __('Enviar') }}
-                                                </button>
-                                            </td> -->
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -151,8 +132,9 @@
                         </div>
                     </div>
                 </div>
-                <!-- Preguntar a José si quitar esto -->
-                {!! $empresas->links() !!}
+                <div class="d-flex justify-content-center">
+                    {{ $empresas->links('pagination::bootstrap-4') }}
+                </div>
             </div>
         </div>
     </div>
