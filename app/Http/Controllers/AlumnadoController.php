@@ -42,11 +42,6 @@ class AlumnadoController extends Controller
         // Recuperamos la convocatoria en estado de preparación
         $convocatoria = Convocatorias::where('estado', 'Preparación')->first();
 
-        // Si no hay convocatoria en preparación, redirigimos a la página de convocatorias
-        if (!$convocatoria) {
-            return redirect()->route('convocatorias.index')->with('error', 'No hay convocatorias en estado de preparación.');
-        }
-
         // Recuperamos el curso academico más reciente
         $annoAcademico = curso_academico_new::orderBy('created_at', 'desc')->first();
 
@@ -65,7 +60,6 @@ class AlumnadoController extends Controller
         $request->validate([
             'archivo' => 'required|mimes:csv,txt',
             'curso' => 'required',
-            'convocatoria' => 'required',
             'anno_academico' => 'required'
         ]);
         
@@ -121,7 +115,6 @@ class AlumnadoController extends Controller
             // Vamos a comprobar si el alumno ya  está asignado a este curso academico con un ciclo
             $alumnoExiste = Curso_academico_alumno::where('alumno_id', $alumno->id)
                 ->where('curso_academico_id', $request->anno_academico)
-                ->where('ciclo_nombre', $request->curso)
                 ->exists();
 
             // Si el alumno ya está asignado a este curso académico, lo añadimos a la lista de duplicados
@@ -146,10 +139,12 @@ class AlumnadoController extends Controller
             $cursoAcademico->ciclo_nombre = $request->curso;
             $cursoAcademico->save();
 
-            $asignacion = new Asignaciones();
-            $asignacion->convocatoria_id = $convocatoriaId;
-            $asignacion->alumnado_id = $alumno->id;
-            $asignacion->save();
+            if ($convocatoriaId) {
+                $asignacion = new Asignaciones();
+                $asignacion->convocatoria_id = $convocatoriaId;
+                $asignacion->alumnado_id = $alumno->id;
+                $asignacion->save();
+            }
         }
 
         // Puedes retornar un mensaje con los IDs de alumnos duplicados

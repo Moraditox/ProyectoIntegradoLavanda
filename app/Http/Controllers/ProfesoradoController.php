@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\curso_academico_new;
 use App\Models\Profesores;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -26,7 +27,11 @@ class ProfesoradoController extends Controller
     {
         $actionImportar = route('profesorados.import');
         $actionImagenes = route('profesorados.uploadImages');
-        return view('profesorado.importarProfesores', compact('actionImportar', 'actionImagenes'));
+
+        // Recuperamos el curso academico más reciente
+        $annoAcademico = curso_academico_new::orderBy('created_at', 'desc')->first();
+
+        return view('profesorado.importarProfesores', compact('actionImportar', 'actionImagenes', 'annoAcademico'));
     }
 
 

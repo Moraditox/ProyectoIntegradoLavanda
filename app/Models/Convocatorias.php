@@ -41,12 +41,6 @@ class Convocatorias extends Model
         return $this->hasMany('App\Models\Asignaciones', 'convocatoria_id', 'id');
     }
 
-    // Relación 1:N con la tabla convocatoria_cursos
-    public function convocatoria_cursos()
-    {
-        return $this->hasMany('App\Models\Convocatoria_Cursos', 'convocatoria_id', 'id');
-    }
-
     // Definir una relación para obtener los cursos académicos asociados
     public function cursosAcademicos()
     {
@@ -54,6 +48,12 @@ class Convocatorias extends Model
     }
     public function empresa() {
         return $this->belongsTo('App\Models\Empresa', 'empresa_id', 'id');
+    }
+
+    // Relación n:n con la tabla ciclos_disponibles
+    public function ciclosDisponibles()
+    {
+        return $this->belongsToMany('App\Models\CiclosDisponibles', 'convocatoria_ciclo', 'convocatoria_id', 'ciclo_nombre');
     }
 
 }

@@ -40,8 +40,12 @@
                 @endisset
                 <div class="form-group col-md-6">
                     <label for="convocatoria">La convocatoria en preparación actual</label>
-                    <input type="text" class="form-control" value="{{ $convocatoria->periodo . '   ' . $convocatoria->anno_academico }}" disabled>
-                    <input type="hidden" name="convocatoria" value="{{ $convocatoria->id }}">
+                    @if (isset($convocatoria) && $convocatoria)
+                        <input type="text" class="form-control" value="{{ $convocatoria->periodo }}" disabled>
+                        <input type="hidden" name="convocatoria" value="{{ $convocatoria->id }}">
+                    @else
+                        <input type="text" class="form-control" value="No existe convocatoria en preparación" disabled>
+                    @endif
                 </div>
             </div>
             <div class="form-group">
