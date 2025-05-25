@@ -40,4 +40,16 @@ class Convocatoria_Empresa extends Model
         return $this->hasMany('App\Models\OfertaPlaza', 'relacion_convocatoria_empresa_id', 'id');
     }
 
+    // Relación 1:1 con alumnado
+    public function alumnoReferencia()
+    {
+        return $this->belongsTo('App\Models\Alumnado', 'alumno_referencia_id', 'id');
+    }
+
+    // Relación 1:1 con profesorado
+    public function profesorReferencia()
+    {
+        return $this->belongsTo('App\Models\Profesores', 'profesor_referencia_id', 'id');
+    }
+
 }

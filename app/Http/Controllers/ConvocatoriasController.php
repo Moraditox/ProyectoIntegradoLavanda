@@ -60,7 +60,13 @@ class ConvocatoriasController extends Controller
 
         // $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)->get();
         $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)
-            ->with(['empresa', 'empresa.convocatorias', 'ofertaPlazas'])
+            ->with([
+            'empresa',
+            'empresa.convocatorias',
+            'ofertaPlazas',
+            'alumnoReferencia', // relación con Alumnado
+            'profesorReferencia' // relación con Profesores
+            ])
             ->get();
 
         // Inicializa $empresaId con un valor predeterminado
