@@ -107,7 +107,7 @@
 													<td style="width:250px">
 														<a href="{{ $rutaAlumno }}" class="enlace-alumno {{ (empty(optional($matricula->alumnado->asignaciones)->empresa) || empty(optional($matricula->alumnado->asignaciones)->profesor)) ? 'text-danger' : '' }}">{{ $alumno->apellido1 }} {{ $alumno->apellido2 }} {{ $alumno->nombre }}</a>
 													</td>
-													<td>{{ $matricula->curso_academico->ciclo }}</td>
+													<td>{{ $matricula->ciclo }}</td>
 													<td>
 														@php $asignacionEmpresa = optional($matricula->alumnado->asignaciones)->empresa; @endphp 
 														@if($asignacionEmpresa) 
@@ -214,8 +214,16 @@
 										<tr>
 											<td>{{ $empresa->nombre}}</td>
 											<td>{{ $empresa->persona_contacto}}</td>
-											<td>{{ $empresa->alumno_contacto ?? 'No asignado' }}</td>
-											<td>{{ $empresa->profesor_contacto ?? 'No asignado' }}</td>
+											<td>
+												{{ $convocatoria_empresa->alumnoReferencia 
+													? $convocatoria_empresa->alumnoReferencia->apellido1 . ' ' . $convocatoria_empresa->alumnoReferencia->apellido2 . ' ' . $convocatoria_empresa->alumnoReferencia->nombre 
+													: 'No asignado' }}
+											</td>
+											<td>
+												{{ $convocatoria_empresa->profesorReferencia 
+													? $convocatoria_empresa->profesorReferencia->nombre . ' ' . $convocatoria_empresa->profesorReferencia->apellido1 
+													: 'No asignado' }}
+											</td>
 											<td>{{ $empresa->telefono_contacto}}</td>
 											<td>{{ $empresa->correo_contacto}}</td>
 											<td>{{ $convocatoria_empresa->observaciones}}</td>
@@ -360,28 +368,6 @@
 
 </section>
 
-<!-- Modal de Confirmación -->
-<!-- <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modalTitle">Confirmación</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">&times;</span>
-															</button>
-			</div>
-			<div class="modal-body">
-				<p id="modalMessage">¿Estás seguro de que quieres enviar el correo?</p>
-			</div>
-
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-				<a href="#" class="btn btn-primary" id="confirmButton">Confirmar</a>
-			</div>
-		</div>
-	</div>
-</div> -->
-
 <!-- Modal de Informes -->
 <div class="modal fade" id="informesModal" tabindex="-1" role="dialog" aria-labelledby="informesModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl" role="document">
@@ -398,117 +384,6 @@
 		</div>
 	</div>
 </div>
-
-<!-- Scripts -->
-{{-- ESTO LO HE COMENTADO PORQUE SI NO HAY MATRICULAS NO DEJA ENTRAR A LA VISTA --}}
-{{-- <script>
-	$(document).ready(function () {
-		        // Función para mostrar el contenido del modal de informes
-		        function mostrarInformes(alumnoId) {
-
-		            var informesContent = `
-		                <table class="table mt-4">
-		                    <thead>
-		                        <tr>
-		                            <th>Seguimiento</th>
-		                            <th>Documentación Final</th>
-		                            <th>Subida de archivos</th>
-		                        </tr>
-		                    </thead>
-		                    <tbody>
-		                        <tr>
-		                            <!-- contenido -->
-		                            <td>
-		                                @if ($empresa)
-											<a href="#" class="btn btn-primary btn-sm" title="Enviar formulario a la empresa" onclick="showConfirmationModalEmpresa('{{ route('enviar-correo-empresa', $empresa->id) }}', 'empresa', '{{ $empresa->nombre }}')">
-												<i class="fas fa-building"></i>
-											</a>
-											@else @endif
-		
-											<a href="#" class="btn btn-primary btn-sm" title="Enviar formulario al alumno" onclick="showConfirmationModalAlumno('{{ route('enviar-correo-alumno', $matricula->id) }}', 'alumno', '{{ $alumno->nombre }}')">
-												<i class="fas fa-user"></i>
-											</a>
-											<button class="btn btn-primary btn-sm" onclick="showFormularioModal('{{ route('verFormularioSeguimiento', $alumno->id) }}', {{ $alumno->id }})">
-												<i class="fas fa-eye"></i>
-											</button>
-		                            </td>
-		                            <!-- Modal de Confirmación -->
-													<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-														<div class="modal-dialog" role="document">
-															<div class="modal-content">
-																<div class="modal-header">
-																	<h5 class="modal-title" id="modalTitle">Confirmación</h5>
-																	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																		<span aria-hidden="true">&times;</span>
-																	</button>
-																</div>
-																<div class="modal-body">
-																	<p id="modalMessage">¿Estás seguro de que quieres enviar el correo?</p>
-																</div>
-		
-																<div class="modal-footer">
-																	<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-																	<a href="#" class="btn btn-primary" id="confirmButton">Confirmar</a>
-																</div>
-															</div>
-														</div>
-													</div>
-		
-		                            <td>
-		                                @if ($empresa)
-														<a href="#" class="btn btn-primary btn-sm" title="Enviar PDF a la empresa" onclick="showConfirmationModalEmpresa('{{ route('enviar-correo-pdf-empresa', $empresa->id ?? '') }}', 'pdf-empresa', '{{ $empresa->nombre ?? '' }}')">
-															<i class="fas fa-file-pdf"></i> PDF Empresa
-														</a><br><br> @endif @if ($alumno)
-														<a href="#" class="btn btn-primary btn-sm" title="Enviar PDF al alumno" onclick="showConfirmationModalAlumno('{{ route('enviar-correo-pdf-alumno', $alumno->id ?? '') }}', 'pdf-alumno', '{{ $alumno->nombre ?? '' }}')">
-															<i class="fas fa-file-pdf"></i> PDF Alumno
-														</a>
-														@endif
-		                            </td>
-		
-		                            <td>
-		                                <form style="width:370px" action="{{ route('informes.store') }}" method="POST" enctype="multipart/form-data">
-															@csrf
-															<input type="hidden" name="empresa_id" value="{{ optional($empresa)->id }}">
-															<input type="hidden" name="alumno_id" id="alumno_id" value="{{ $alumno->id }}">
-		
-		
-															<label for="tipo_informe">Tipo de informe:</label>
-															<select name="tipo_informe" id="tipo_informe">
-		                                <option value="alumnado">Informe de Alumnado</option>
-		                                <option value="profesorado">Informe de Profesorado</option>
-		                                <option value="ficha_semanal">Ficha Semanal</option>
-		                            </select>
-		
-		
-		
-		
-															<input type="file" name="file" accept=".pdf">
-															<button type="submit" class="btn btn-primary btn-sm">
-		                                <i class="fas fa-upload"></i>
-		                            </button>
-														</form>
-		                            </td>
-		
-		                        </tr>
-		                    </tbody>
-		                </table>
-		            `;
-
-		            // Inserta el contenido en el modal
-		            $('#informesModalContent').html(informesContent);
-		        }
-		
-		        // Manejador de eventos para el botón Informes
-		        $('.informesBtn').on('click', function () {
-		            var alumnoId = $(this).data('alumno-id');
-		            // Muestra el modal y carga la información del alumno correspondiente
-		            $('#informesModal').modal('show');
-		            mostrarInformes(alumnoId);
-		        });
-		    });
-		
-	
-</script> --}}
 
 <script>
 	$(document).ready(function () {

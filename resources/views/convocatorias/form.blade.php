@@ -23,16 +23,8 @@
         </div>
         <div class="form-group">
             {{ Form::label('anno_academico', 'Año Académico') }}
-            <select class="form-control select2" name="anno_academico">
-                @if ($convocatoria->anno_academico)
-                    <option value="{{ $convocatoria->anno_academico }}" selected>{{ $convocatoria->anno_academico }}</option>
-                @else
-                    <option value="" selected disabled>Selecciona un año académico</option>
-                    @foreach ($annos as $annoValue => $annoLabel)
-                        <option value="{{ $annoValue }}">{{ $annoLabel }}</option>
-                    @endforeach
-                @endif
-            </select>
+            {{ Form::text('anno_academico', $annoAcademico->years, ['class' => 'form-control', 'disabled' => true, 'placeholder' => 'Año Académico']) }}
+            {{ Form::hidden('anno_academico', $annoAcademico->id) }}
             {!! $errors->first('anno_academico', '<div class="invalid-feedback">:message</div>') !!}
         </div>
         <div class="form-group">
@@ -40,17 +32,8 @@
             <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
                 <select class="form-control select2" name="curso_academico[]" multiple>
                     <option value="" disabled>Selecciona los cursos académicos</option>
-                    @foreach ($cursos as $cursoValue => $cursoLabel)
-                        @php
-                        if(isset($cursosSeleccionados)) {
-                            $isSelected = in_array($cursoValue, $cursosSeleccionados); // Verificar si el curso está seleccionado previamente
-                        }
-                        @endphp
-                        @if (isset($isSelected))
-                            <option value="{{ $cursoValue }}" {{ $isSelected ? 'selected' : '' }}>{{ $cursoLabel }}</option>
-                        @else
-                            <option value="{{ $cursoValue }}">{{ $cursoLabel }}</option>
-                        @endif
+                    @foreach ($cursos as $curso)
+                        <option value="{{ $curso }}" selected>{{ $curso }}</option>
                     @endforeach
                 </select>
             </div>
@@ -59,9 +42,9 @@
         <div class="form-group">
             {{ Form::label('estado', 'Estado') }}
             <select class="form-control select2" name="estado">
-                <option value="" disabled {{ empty($convocatoria->estado) ? 'selected' : '' }}>Selecciona el estado</option>
+                <option value="" disabled {{ empty(old('estado', $convocatoria->estado)) ? 'selected' : '' }}>Selecciona el estado</option>
                 <option value="Activa" {{ (old('estado', $convocatoria->estado) == 'Activa') ? 'selected' : '' }}>Activa</option>
-                <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación') ? 'selected' : '' }}>Preparación</option>
+                <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación' || (empty(old('estado', $convocatoria->estado)) && !isset($convocatoria->estado))) ? 'selected' : '' }}>Preparación</option>
                 <option value="Terminada" {{ (old('estado', $convocatoria->estado) == 'Terminada') ? 'selected' : '' }}>Terminada</option>
             </select>
             {!! $errors->first('estado', '<div class="invalid-feedback">:message</div>') !!}
