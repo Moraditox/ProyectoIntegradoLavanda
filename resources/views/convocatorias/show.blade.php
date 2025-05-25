@@ -107,7 +107,7 @@
 													<td style="width:250px">
 														<a href="{{ $rutaAlumno }}" class="enlace-alumno {{ (empty(optional($matricula->alumnado->asignaciones)->empresa) || empty(optional($matricula->alumnado->asignaciones)->profesor)) ? 'text-danger' : '' }}">{{ $alumno->apellido1 }} {{ $alumno->apellido2 }} {{ $alumno->nombre }}</a>
 													</td>
-													<td>{{ $matricula->curso_academico->ciclo }}</td>
+													<td>{{ $matricula->ciclo }}</td>
 													<td>
 														@php $asignacionEmpresa = optional($matricula->alumnado->asignaciones)->empresa; @endphp 
 														@if($asignacionEmpresa) 

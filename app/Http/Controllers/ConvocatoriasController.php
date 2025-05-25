@@ -84,13 +84,33 @@ class ConvocatoriasController extends Controller
         $actuaciones = Actuaciones::all();
 
         // Obtener las matrículas de los alumnos asociados a la convocatoria
-        $matriculas = Matricula::with(['alumnado', 'alumnado.asignaciones.empresa'])
-            ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
-             ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
-             ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')->whereIn('alumno_id', $alumnosIds)
-             ->orderBy('ciclos.ciclo')
-             ->orderBy('alumnado.apellido1')->get();
+        // $matriculas = Matricula::with(['alumnado', 'alumnado.asignaciones.empresa'])
+        //     ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
+        //      ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
+        //      ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')->whereIn('alumno_id', $alumnosIds)
+        //      ->orderBy('ciclos.ciclo')
+        //      ->orderBy('alumnado.apellido1')->get();
 
+        // Recuperamos todas las asignaciones de alumnos a esta convocatoria
+        $matriculas = Asignaciones::with(['alumnado', 'empresa', 'profesor'])
+            ->whereIn('alumnado_id', $alumnosIds)
+            ->get();
+
+        // Recorremos cada matricula y recuperamos el ciclo del alumno
+        foreach ($matriculas as $matricula) {
+            $cursoAcademico = DB::table('curso_academico_alumno')
+                ->where('alumno_id', $matricula->alumnado_id)
+                ->where('curso_academico_id', $convocatoria->anno_academico)
+                ->select('ciclo_nombre')
+                ->first();
+
+            if ($cursoAcademico) {
+                $matricula->ciclo = $cursoAcademico->ciclo_nombre;
+            } else {
+                $matricula->ciclo = 'No asignado';
+            }
+        }
+    
         // Obtener los registros de curso_academico_alumno para los alumnos asociados a la convocatoria
         // $matriculas = \App\Models\Asignaciones::with(['alumnado', 'empresa', 'profesor'])
         //     ->whereIn('alumnado_id', $alumnosIds)
