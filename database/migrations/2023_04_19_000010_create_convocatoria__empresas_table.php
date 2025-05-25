@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Crear la tabla convocatoria_empresas
-        Schema::create('convocatoria_empresas', function (Blueprint $table) {
+        Schema::create('convocatoria_empresa', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('convocatoria_id');
             $table->unsignedBigInteger('empresa_id');
             $table->unsignedBigInteger('alumno_referencia_id')->nullable();
             $table->unsignedBigInteger('profesor_referencia_id')->nullable();
@@ -32,7 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Eliminar la tabla convocatoria_empresas
-        Schema::dropIfExists('convocatoria_empresas');
+        Schema::dropIfExists('convocatoria_empresa');
     }
 };

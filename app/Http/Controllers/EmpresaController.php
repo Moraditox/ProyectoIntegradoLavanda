@@ -513,7 +513,6 @@ class EmpresaController extends Controller
 
         return view('alumnadoVistaMail');
     }
-
     // Método que devuelve el formulario para unir una empresa a una convocatoria
     public function unirseConvocatoriaForm($id)
     {

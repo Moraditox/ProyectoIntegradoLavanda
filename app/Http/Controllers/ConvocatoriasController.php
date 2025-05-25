@@ -23,6 +23,14 @@ use Illuminate\Support\Facades\Mail;
 
 class ConvocatoriasController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+    }
 
     /**
      * Index
@@ -43,6 +51,13 @@ class ConvocatoriasController extends Controller
 
     public function show(Convocatorias $convocatoria)
     {
+        // ****
+        // $matriculas = Matricula::join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
+        //     ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
+        //     ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')
+        //     ->orderBy('ciclos.ciclo')
+        //     ->orderBy('alumnado.apellido1');
+            // ****
 
         $convocatoria_cursos = Convocatoria_Cursos::where('convocatoria_id', $convocatoria->id)
             ->with('curso_academico')
@@ -190,6 +205,8 @@ class ConvocatoriasController extends Controller
     }
 
 
+
+
     /**
      * Create
      *
@@ -224,27 +241,15 @@ class ConvocatoriasController extends Controller
     }
 
     /**
-     * Store a newly created convocatoria in storage.
+     * Store a newly created resource in storage.
      *
-     * This method validates the incoming request data using the rules defined
-     * in the Convocatorias model. It creates a new convocatoria record, associates
-     * it with the selected academic courses and companies, and saves the relationships
-     * in the database.
-     *
-     * @param \Illuminate\Http\Request $request The incoming HTTP request containing
-     *                                          convocatoria data, selected academic courses,
-     *                                          and optionally associated companies.
-     *
-     * @return \Illuminate\Http\RedirectResponse Redirects to the index route of convocatorias
-     *                                            with a success message upon successful creation.
-     *
-     * @throws \Illuminate\Validation\ValidationException If the validation of the request data fails.
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $request->validate(Convocatorias::$rules);
 
-        // Creamos la convocatoria
         $valoresConvocatoria = $request->except('curso_academico', 'empresas');
 
         $convocatoria = new Convocatorias($valoresConvocatoria);
@@ -279,8 +284,6 @@ class ConvocatoriasController extends Controller
                 $convocatoria_empresa = new Convocatoria_Empresa();
                 $convocatoria_empresa->convocatoria_id = $convocatoria->id;
                 $convocatoria_empresa->empresa_id = $empresa;
-                $convocatoria_empresa->tareas_a_realizar = null;
-                $convocatoria_empresa->perfil_requerido = null;
                 $convocatoria_empresa->save();
 
                 $convocatoria_empresas[] = $convocatoria_empresa;
