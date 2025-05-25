@@ -25,7 +25,13 @@ class HomeController extends Controller
     public function index()
     {
         // Agrupar las convocatorias por año académico
-        $convocatorias = DB::table('convocatorias')->orderByDesc('anno_academico')->get()->groupBy('anno_academico');
+        $convocatorias = DB::table('convocatorias')
+            ->join('cursos_academicos', 'convocatorias.anno_academico', '=', 'cursos_academicos.id')
+            ->select('convocatorias.*', 'cursos_academicos.years as anno_academico_years')
+            ->orderByDesc('cursos_academicos.years')
+            ->get()
+            ->groupBy('anno_academico_years');
+            
         return view('home', compact('convocatorias'));
     }
 

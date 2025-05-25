@@ -1,7 +1,7 @@
 @extends('importar')
 
 @section('titulo')
-<h1>Importar alumnos</h1>
+<h1>Importar alumnos {{ $annoAcademico->years}}</h1>
 @endsection
 
 @section('requisitos')

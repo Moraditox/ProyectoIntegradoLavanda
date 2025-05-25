@@ -1,8 +1,8 @@
 <div class="form-row">
     <div class="form-group col-md-2">
         <label for="convocatoria_id">{{ __('Convocatoria') }}</label>
-        <input type="text" class="form-control" value="{{ $convocatorias[0]->periodo }} - {{ $convocatorias[0]->anno_academico }}" disabled>
-        <input type="hidden" name="convocatoria_id" value="{{ $convocatorias[0]->id }}">
+        <input type="text" class="form-control" value="{{ $convocatorias->periodo }} - {{ $convocatorias->anno_academico }}" disabled>
+        <input type="hidden" name="convocatoria_id" value="{{ $convocatorias->id }}">
     </div>
     <div class="form-group col-md-3">
         <label for="profesor_referencia_id">{{ __('Profesor de Referencia') }}</label>

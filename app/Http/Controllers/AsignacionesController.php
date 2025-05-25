@@ -103,7 +103,6 @@ class AsignacionesController extends Controller
         return redirect()->route('asignaciones.show', [$convocatoria_id, $asignacion->alumnado->matricula()->first()->curso_academico_id])
             ->with('success', 'Asignaciones creadas correctamente.');
     }
-
     public function asignarEmpresa(Request $request)
     {
         $matriculaId = $request->input('matriculaId');
@@ -115,7 +114,6 @@ class AsignacionesController extends Controller
 
         return redirect()->back()->with('success', 'Asignación de empresa exitosa.');
     }
-    
     public function asignarProfesor(Request $request)
     {
         $matriculaId = $request->input('matriculaId');

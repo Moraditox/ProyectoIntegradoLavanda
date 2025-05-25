@@ -9,7 +9,7 @@ class Convocatoria_Empresa extends Model
 {
     use HasFactory;
 
-    protected $table = 'convocatoria_empresas';
+    protected $table = 'convocatoria_empresa';
 
     static $rules = [
         'convocatoria_id' => 'required',
@@ -38,6 +38,18 @@ class Convocatoria_Empresa extends Model
     public function ofertaPlazas()
     {
         return $this->hasMany('App\Models\OfertaPlaza', 'relacion_convocatoria_empresa_id', 'id');
+    }
+
+    // Relación 1:1 con alumnado
+    public function alumnoReferencia()
+    {
+        return $this->belongsTo('App\Models\Alumnado', 'alumno_referencia_id', 'id');
+    }
+
+    // Relación 1:1 con profesorado
+    public function profesorReferencia()
+    {
+        return $this->belongsTo('App\Models\Profesores', 'profesor_referencia_id', 'id');
     }
 
 }

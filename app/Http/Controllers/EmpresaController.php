@@ -513,7 +513,6 @@ class EmpresaController extends Controller
 
         return view('alumnadoVistaMail');
     }
-
     // Método que devuelve el formulario para unir una empresa a una convocatoria
     public function unirseConvocatoriaForm($id)
     {
@@ -523,13 +522,54 @@ class EmpresaController extends Controller
         }
 
         // Recuperamos la convocatoria que esté en estado Preparación
+        // Obtener el id del año académico más reciente
+        $ultimoAnno = DB::table('cursos_academicos')->orderByDesc('years')->first();
         $convocatorias = DB::table('convocatorias')
             ->where('estado', 'Preparación')
-            ->get();
+            ->where('anno_academico', $ultimoAnno->id)
+            ->first();
+        $convocatorias->anno_academico = $ultimoAnno->years;
 
         // Recuperamos a los profesores y alumnos relacionados al la convocatoria seleccionada
         // *** SIN IMPLEMENTAR ***
-        $alumnos = Alumnado::all();
+        // Recuperamos a los alumnos que en la tabla de asignaciones tengan un id en convocatoria_id igual a la id de convocatoria seleccionada
+        // Recuperar todas las asignaciones que coincidan con la id de convocatoria seleccionada
+        $alumnos = Asignaciones::with(['alumnado', 'convocatorias'])
+            ->where('convocatoria_id', $convocatorias->id)
+            ->get();
+        // Recorremos las asignaciones y obtenemos los datos de los alumnos
+        $alumnos = $alumnos->map(function ($asignacion) {
+            return [
+                'id' => $asignacion->alumnado->id,
+                'nombre' => $asignacion->alumnado->nombre,
+                'apellido1' => $asignacion->alumnado->apellido1,
+                'apellido2' => $asignacion->alumnado->apellido2,
+            ];
+        });
+        // Recorremos la tabla curso academico y obtenemos el ciclo de cada alumno
+        $alumnos = $alumnos->map(function ($alumno) use ($ultimoAnno) {
+            // Buscar el curso académico del alumno que coincida con el año académico actual
+            $cursoAcademicoAlumno = DB::table('curso_academico_alumno')
+            ->where('alumno_id', $alumno['id'])
+            ->where('curso_academico_id', $ultimoAnno->id)
+            ->first();
+
+            // Obtener el ciclo si existe la relación
+            $ciclo = null;
+            if ($cursoAcademicoAlumno) {
+            $ciclo = $cursoAcademicoAlumno->ciclo_nombre ?? null;
+            }
+
+            return array_merge($alumno, [
+            'ciclo' => $ciclo,
+            ]);
+        });
+
+        // Convertimos el array de alumnos en un array de obetjos
+        $alumnos = $alumnos->map(function ($alumno) {
+            return (object) $alumno;
+        });
+
         $profesores = DB::table('profesores')->get();
 
         // Recuperamos las especialidades de la empresa

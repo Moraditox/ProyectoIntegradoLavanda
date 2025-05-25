@@ -10,6 +10,8 @@ use App\Models\Ciclos;
 use App\Models\Convocatoria_Cursos;
 use App\Models\Convocatorias;
 use App\Models\Curso_Academico;
+use App\Models\Curso_academico_alumno;
+use App\Models\curso_academico_new;
 use App\Models\Empresa;
 use App\Models\Formulario_Seguimiento_Alumno;
 use App\Models\Formulario_Seguimiento_Empresa;
@@ -29,20 +31,57 @@ class AlumnadoController extends Controller
     {
     }
 
+    /**
+     * Show the index page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    // public function index()
+    // {
+    //     $actionImportar = route('alumnados.import');
+    //     $actionImagenes = route('alumnados.uploadImages');
+    //     $cursos = Curso_Academico::all();
+    //     $convocatorias = Convocatorias::all();
+
+    //     // Eager load the curso_academico relationship
+    //     $matriculas = Matricula::with('curso_academico')->get();
+
+    //     return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'matriculas'));
+    // }
+
+    // public function index()
+    // {
+    //     $actionImportar = route('alumnados.import');
+    //     $actionImagenes = route('alumnados.uploadImages');
+    //     $cursos = Curso_Academico::all();
+    //     $convocatorias = Convocatorias::all();
+
+    //     // Obtener las matrículas ordenadas alfabéticamente por apellido
+    //     $matriculas = Matricula::with(['alumnado', 'curso_academico'])
+    //         ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
+    //         ->orderBy('alumnado.apellido1')
+    //         ->orderBy('alumnado.apellido2')
+    //         ->orderBy('alumnado.nombre')
+    //         ->get();
+
+    //     return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'matriculas'));
+    // }
+
     public function index()
     {
         $actionImportar = route('alumnados.import');
         $actionImagenes = route('alumnados.uploadImages');
-        $cursos = Curso_Academico::all();
-        $convocatorias = Convocatorias::all();
 
-        // Obtener las matrículas ordenadas alfabéticamente por apellido
-        $alumnos = Alumnado::orderBy('apellido1')
-            ->orderBy('apellido2')
-            ->orderBy('nombre')
-            ->get();
+        // Recuperamos todos los ciclos disponibles
+        $cursos = DB::table('ciclos_disponibles')->get();
 
-        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatorias', 'alumnos'));
+        // Recuperamos la convocatoria en estado de preparación
+        $convocatoria = Convocatorias::where('estado', 'Preparación')->first();
+
+        // Recuperamos el curso academico más reciente
+        $annoAcademico = curso_academico_new::orderBy('created_at', 'desc')->first();
+
+        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatoria', 'annoAcademico'));
     }
 
 
@@ -57,12 +96,10 @@ class AlumnadoController extends Controller
         $request->validate([
             'archivo' => 'required|mimes:csv,txt',
             'curso' => 'required',
-            'convocatoria' => 'required',
+            'anno_academico' => 'required'
         ]);
-
+        
         $convocatoriaId = $request->input('convocatoria');
-        $cursoId = $request->input('curso');
-        $annoActual = now()->year . '-' . (now()->year + 1);
 
         $archivo = $request->file('archivo');
         $file_path = $archivo->getPathName();
@@ -77,67 +114,73 @@ class AlumnadoController extends Controller
             $filas[] = array_combine($encabezado, $fila);
         }
 
-        // Añadir un nuevo anno academico si no existe
-        $anno_actual = now()->year;
-        $anno_actual = $anno_actual . '-' . ($anno_actual + 1);
-        $annos = Anno_Academico::get()->pluck('anno')->toArray();
-        $anno_existe = false;
-        foreach ($annos as $anno) {
-            if ($anno == $anno_actual) {
-                $anno_existe = true;
-            }
-        }
-        if (!$anno_existe) {
-            $anno = new Anno_Academico();
-            $anno->anno = $anno_actual;
-            $anno->save();
-        }
-
         // Procesar y guardar los datos en la base de datos
         $alumnosDuplicados = [];
 
         foreach ($filas as $fila) {
             // Verifica si el alumno ya está matriculado en la misma convocatoria
-            $alumnoExistente = Matricula::whereHas('alumnado', function ($query) use ($fila) {
-                $query->where('nie', $fila['nie']);
-            })->whereHas('asignaciones', function ($query) use ($convocatoriaId) {
-                $query->where('convocatoria_id', $convocatoriaId);
-            })->exists();
+            // $alumnoExistente = Matricula::whereHas('alumnado', function ($query) use ($fila) {
+            //     $query->where('nie', $fila['nie']);
+            // })->whereHas('asignaciones', function ($query) use ($convocatoriaId) {
+            //     $query->where('convocatoria_id', $convocatoriaId);
+            // })->exists();
 
+            // Comprobamos si el alumno ya existe en la base de datos usando el DNI, no lo volvemos a insertar
+            $alumnoExistente = Alumnado::where('nie', $fila['nie'])->exists();
 
+            // En caso de que no exista, creamos un nuevo registro en alumnado
+            if (!$alumnoExistente) {
+                // Resto de tu lógica para insertar al nuevo alumno
+                $alumno = new Alumnado();
+                $alumno->apellido1 = $fila['apellido1'];
+                $alumno->apellido2 = $fila['apellido2'];
+                $alumno->nombre = $fila['nombre'];
+                $alumno->nie = $fila['nie'];
+                $alumno->email_corporativo = $fila['email_corporativo'];
+                $alumno->email_personal = $fila['email_personal'];
+                $alumno->dni = $fila['dni'];
+                $alumno->movil = $fila['movil'];
+                $alumno->imagen = $fila['nie'] . '.jpg';
+                $alumno->token = DB::raw('MD5(UUID())');
+                $alumno->save();
+            } else {
+                // Si el alumno ya existe, lo buscamos
+                $alumno = Alumnado::where('nie', $fila['nie'])->first();
+            }
 
-            if ($alumnoExistente) {
+            // Vamos a comprobar si el alumno ya  está asignado a este curso academico con un ciclo
+            $alumnoExiste = Curso_academico_alumno::where('alumno_id', $alumno->id)
+                ->where('curso_academico_id', $request->anno_academico)
+                ->exists();
+
+            // Si el alumno ya está asignado a este curso académico, lo añadimos a la lista de duplicados
+            if ($alumnoExiste) {
                 // Agrega el ID del alumno a la lista de duplicados
                 $alumnosDuplicados[] = $fila['nie'];
 
                 continue;
             }
-
-            // Resto de tu lógica para insertar al nuevo alumno
-            $alumno = new Alumnado();
-            $alumno->apellido1 = $fila['apellido1'];
-            $alumno->apellido2 = $fila['apellido2'];
-            $alumno->nombre = $fila['nombre'];
-            $alumno->nie = $fila['nie'];
-            $alumno->email_corporativo = $fila['email_corporativo'];
-            $alumno->email_personal = $fila['email_personal'];
-            $alumno->dni = $fila['dni'];
-            $alumno->movil = $fila['movil'];
-            $alumno->imagen = $fila['nie'] . '.jpg';
-            $alumno->token = DB::raw('MD5(UUID())');
-            $alumno->save();
-
+            
             // Matricular al alumno en el curso actual
-            $matricula = new Matricula();
-            $matricula->alumno_id = $alumno->id;
-            $matricula->curso_academico_id = $request->curso;
-            $matricula->anno_academico = $anno_actual;
-            $matricula->save();
+            // $matricula = new Matricula();
+            // $matricula->alumno_id = $alumno->id;
+            // $matricula->curso_academico_id = $request->curso;
+            // $matricula->anno_academico = $anno_actual;
+            // $matricula->save();
 
-            $asignacion = new Asignaciones();
-            $asignacion->convocatoria_id = $convocatoriaId;
-            $asignacion->alumnado_id = $alumno->id;
-            $asignacion->save();
+            // Creamos la relación entre el alumno y el curso académico
+            $cursoAcademico = new Curso_academico_alumno();
+            $cursoAcademico->curso_academico_id = $request->anno_academico;
+            $cursoAcademico->alumno_id = $alumno->id;
+            $cursoAcademico->ciclo_nombre = $request->curso;
+            $cursoAcademico->save();
+
+            if ($convocatoriaId) {
+                $asignacion = new Asignaciones();
+                $asignacion->convocatoria_id = $convocatoriaId;
+                $asignacion->alumnado_id = $alumno->id;
+                $asignacion->save();
+            }
         }
 
         // Puedes retornar un mensaje con los IDs de alumnos duplicados
