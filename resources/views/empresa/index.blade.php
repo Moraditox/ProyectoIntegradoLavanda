@@ -69,7 +69,7 @@
                                         <tr>
                                             <td><img src="{{ asset('storage/logos/' . $empresa->logo) }}" alt="Logo"
                                                 style="max-width: 90px;"></td>
-                                            <td>{{ $empresa->nombre }}</td>
+                                            <td style="width:30%">{{ $empresa->nombre }}</td>
                                             <td>{{ $empresa->persona_contacto }}</td>
                                             <td>{{ $empresa->correo_contacto }}</td>
                                             <td>{{ $empresa->telefono_contacto }}</td>
