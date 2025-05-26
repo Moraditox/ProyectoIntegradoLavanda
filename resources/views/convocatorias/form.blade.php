@@ -23,7 +23,11 @@
         </div>
         <div class="form-group">
             {{ Form::label('anno_academico', 'Año Académico') }}
-            {{ Form::text('anno_academico', $annoAcademico->years, ['class' => 'form-control', 'disabled' => true, 'placeholder' => 'Año Académico']) }}
+            {{ Form::text('anno_academico', $annoAcademico->years, [
+                'class' => 'form-control',
+                'disabled' => true,
+                'placeholder' => 'Año Académico'
+            ]) }}
             {{ Form::hidden('anno_academico', $annoAcademico->id) }}
             {!! $errors->first('anno_academico', '<div class="invalid-feedback">:message</div>') !!}
         </div>
@@ -33,7 +37,11 @@
                 <select class="form-control select2" name="curso_academico[]" multiple>
                     <option value="" disabled>Selecciona los cursos académicos</option>
                     @foreach ($cursos as $curso)
-                        <option value="{{ $curso }}" selected>{{ $curso }}</option>
+                        @if (isset($cursosSeleccionados))
+                            <option value="{{ $curso }}" {{ in_array($curso, $cursosSeleccionados) ? 'selected' : '' }}>{{ $curso }}</option>
+                        @else
+                            <option value="{{ $curso }}" selected>{{ $curso }}</option>
+                        @endif
                     @endforeach
                 </select>
             </div>
@@ -86,6 +94,6 @@
     </div>
     <div class="box-footer mt-2">
         <button type="submit" class="btn btn-primary">{{ __('Enviar') }}</button>
-        <a href="{{ route('convocatorias.index') }}" class="btn btn-danger">{{ __('Cancelar') }}</a>
+        <a href="{{ url()->previous() }}" class="btn btn-danger">{{ __('Cancelar') }}</a>
     </div>
 </div>

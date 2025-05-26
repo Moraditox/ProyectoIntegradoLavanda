@@ -13,9 +13,7 @@ class Convocatorias extends Model
         'periodo' => 'required',
         'fecha_inicio' => 'required',
         'fecha_fin' => 'required',
-        'observaciones' => 'required',
         'anno_academico' => 'required',
-        'curso_academico' => 'required',
         'empresas' => 'nullable',
     ];
 

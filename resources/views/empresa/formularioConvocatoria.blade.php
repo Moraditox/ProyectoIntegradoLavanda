@@ -1,8 +1,8 @@
 <div class="form-row">
     <div class="form-group col-md-2">
         <label for="convocatoria_id">{{ __('Convocatoria') }}</label>
-        <input type="text" class="form-control" value="{{ $convocatorias->periodo }} - {{ $convocatorias->anno_academico }}" disabled>
-        <input type="hidden" name="convocatoria_id" value="{{ $convocatorias->id }}">
+        <input type="text" class="form-control" value="{{ $convocatoria->periodo }} - {{ $convocatoria->anno_academico }}" disabled>
+        <input type="hidden" name="convocatoria_id" value="{{ $convocatoria->id }}">
     </div>
     <div class="form-group col-md-3">
         <label for="profesor_referencia_id">{{ __('Profesor de Referencia') }}</label>
@@ -67,13 +67,13 @@
                             <input type="number" name="especialidades[{{ $i }}][plazas]" class="form-control" value="{{ $esp['plazas'] }}" min="1" required>
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][perfil]" class="form-control" value="{{ $esp['perfil'] }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][perfil]" class="form-control" value="{{ $esp['perfil'] }}">
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][tareas]" class="form-control" value="{{ $esp['tareas'] }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][tareas]" class="form-control" value="{{ $esp['tareas'] }}">
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][observaciones]" class="form-control" value="{{ $esp['observaciones'] }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][observaciones]" class="form-control" value="{{ $esp['observaciones'] }}">
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger remove-row" title="{{ __('Eliminar esta fila de la tabla') }}">
@@ -98,13 +98,13 @@
                             <input type="number" name="especialidades[{{ $i }}][plazas]" class="form-control" value="{{ $esp->plazas }}" min="1" required>
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][perfil]" class="form-control" value="{{ $esp->perfil }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][perfil]" class="form-control" value="{{ $esp->perfil }}">
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][tareas]" class="form-control" value="{{ $esp->tareas }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][tareas]" class="form-control" value="{{ $esp->tareas }}" >
                         </td>
                         <td>
-                            <input type="text" name="especialidades[{{ $i }}][observaciones]" class="form-control" value="{{ $esp->observaciones }}" required>
+                            <input type="text" name="especialidades[{{ $i }}][observaciones]" class="form-control" value="{{ $esp->observaciones }}">
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger remove-row" title="{{ __('Eliminar esta fila de la tabla') }}">

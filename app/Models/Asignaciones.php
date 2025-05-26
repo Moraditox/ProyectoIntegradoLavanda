@@ -11,6 +11,8 @@ class Asignaciones extends Model
 
     protected $table = 'asignaciones';
     protected $fillable = [
+        'convocatoria_id',
+        'alumnado_id',
         'empresa_id',
         'profesores_id',
         // Otros campos aquí

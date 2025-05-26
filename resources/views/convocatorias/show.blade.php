@@ -347,15 +347,21 @@
 													</tr>
 												</thead>
 												<tbody>
-													@foreach($plazas as $plaza)
-													<tr>
-														<td>{{ $plaza->especialidad }}</td>
-														<td>{{ $plaza->plazas }}</td>
-														<td>{{ $plaza->perfil }}</td>
-														<td>{{ $plaza->tareas }}</td>
-														<td>{{ $plaza->observaciones }}</td>
-													</tr>
-													@endforeach
+													@if($plazas->isEmpty())
+														<tr>
+															<td colspan="5" class="text-center">No hay plazas asignadas</td>
+														</tr>
+													@else
+														@foreach($plazas as $plaza)
+														<tr>
+															<td>{{ $plaza->especialidad }}</td>
+															<td>{{ $plaza->plazas }}</td>
+															<td>{{ $plaza->perfil ?? 'No asignado' }}</td>
+															<td>{{ $plaza->tareas ?? 'No asignado' }}</td>
+															<td>{{ $plaza->observaciones ?? 'No asignado' }}</td>
+														</tr>
+														@endforeach
+													@endif
 												</tbody>
 											</table>
 										</div>

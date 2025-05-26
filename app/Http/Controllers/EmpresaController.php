@@ -525,18 +525,23 @@ class EmpresaController extends Controller
         // Recuperamos la convocatoria que esté en estado Preparación
         // Obtener el id del año académico más reciente
         $ultimoAnno = DB::table('cursos_academicos')->orderByDesc('years')->first();
-        $convocatorias = DB::table('convocatorias')
+        $convocatoria = DB::table('convocatorias')
             ->where('estado', 'Preparación')
             ->where('anno_academico', $ultimoAnno->id)
             ->first();
-        $convocatorias->anno_academico = $ultimoAnno->years;
+
+        if (!$convocatoria) {
+            return redirect()->back()->with('error', 'No hay convocatorias disponibles en estado Preparación.');
+        }
+        
+        $convocatoria->anno_academico = $ultimoAnno->years;
 
         // Recuperamos a los profesores y alumnos relacionados al la convocatoria seleccionada
         // *** SIN IMPLEMENTAR ***
         // Recuperamos a los alumnos que en la tabla de asignaciones tengan un id en convocatoria_id igual a la id de convocatoria seleccionada
         // Recuperar todas las asignaciones que coincidan con la id de convocatoria seleccionada
         $alumnos = Asignaciones::with(['alumnado', 'convocatorias'])
-            ->where('convocatoria_id', $convocatorias->id)
+            ->where('convocatoria_id', $convocatoria->id)
             ->get();
         // Recorremos las asignaciones y obtenemos los datos de los alumnos
         $alumnos = $alumnos->map(function ($asignacion) {
@@ -580,7 +585,7 @@ class EmpresaController extends Controller
             ->values()
             ->all();
 
-        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatorias', 'alumnos', 'profesores', 'especialidades'));
+        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatoria', 'alumnos', 'profesores', 'especialidades'));
     }
 
     // Método que recoge los datos del formulario para unir una empresa a una convocatoria
@@ -605,13 +610,16 @@ class EmpresaController extends Controller
         // Comprobamos que las especialidades no se hayan repetido
         $especialidades = $request->input('especialidades');
         $especialidadesUnicas = [];
-        foreach ($especialidades as $especialidad) {
-            if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
-                return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
-            }
-            $especialidadesUnicas[] = $especialidad['nombre'];
-        }
 
+        if (isset($especialidades)) {
+            foreach ($especialidades as $especialidad) {
+                if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
+                    return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+                }
+                $especialidadesUnicas[] = $especialidad['nombre'];
+            }
+        }
+        
         // Validar los datos del formulario
         $request->validate([
             'convocatoria_id' => 'required|exists:convocatorias,id',
@@ -631,16 +639,17 @@ class EmpresaController extends Controller
         
         // Asignamos las plazas a la empresa en la convocatoria
         // Recorremos el apartado de especialidades del request y guardamos cada una de ellas
-        $especialidades = $request->input('especialidades');
-        foreach ($especialidades as $especialidad) {
-            OfertaPlaza::create([
-                'relacion_convocatoria_empresa_id' => $convocatoria_empresa->id,
-                'especialidad' => $especialidad['nombre'],
-                'plazas' => $especialidad['plazas'],
-                'observaciones' => $especialidad['observaciones'],
-                'perfil' => $especialidad['perfil'],
-                'tareas' => $especialidad['tareas']
-            ]);
+        if (isset($especialidades)) {
+            foreach ($especialidades as $especialidad) {
+                OfertaPlaza::create([
+                    'relacion_convocatoria_empresa_id' => $convocatoria_empresa->id,
+                    'especialidad' => $especialidad['nombre'],
+                    'plazas' => $especialidad['plazas'],
+                    'observaciones' => $especialidad['observaciones'],
+                    'perfil' => $especialidad['perfil'],
+                    'tareas' => $especialidad['tareas']
+                ]);
+            }
         }
 
         return redirect()->route('empresas.index')
