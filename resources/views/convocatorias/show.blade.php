@@ -27,7 +27,8 @@
 					@endif
 
 					<div class="float-left">
-						<span class="card-title">{{ __('Información de la') }} convocatoria</span>
+
+						<span class="card-title">{{ __('Información de la') }} convocatoria {{ $convocatoria->periodo }}</span>
 					</div>
 					<div class="float-right">
 						<a class="btn btn-success" href="{{ route('convocatoria.edit', $convocatoria->id) }}"> {{ __('Modificar') }}</a>
