@@ -55,9 +55,9 @@
 							<li class="nav-item">
 								<a class="nav-link" id="empresas-tab" data-toggle="tab" href="#empresas">Empresas</a>
 							</li>
-							<li class="nav-item">
+							{{-- <li class="nav-item">
 								<a class="nav-link" id="plazas-tab" data-toggle="tab" href="#plazas">Plazas</a>
-							</li>
+							</li> --}}
 						</ul>
 
 						    <div class="tab-content">
@@ -204,128 +204,115 @@
 											<th>Profesor de contacto</th>
 											<th>Teléfono</th>
 											<th>Email</th>
-											<th>Observaciones
+											<th>Observaciones</th>
 											<th>Participación</th>
 											<th>Acciones</th>
 										</tr>
 									</thead>
 									<tbody>
-										@foreach($convocatoria_empresas as $convocatoria_empresa) @php $empresa = $convocatoria_empresa->empresa; @endphp
-										<tr>
-											<td>{{ $empresa->nombre}}</td>
-											<td>{{ $empresa->persona_contacto}}</td>
-											<td>
-												{{ $convocatoria_empresa->alumnoReferencia 
-													? $convocatoria_empresa->alumnoReferencia->apellido1 . ' ' . $convocatoria_empresa->alumnoReferencia->apellido2 . ' ' . $convocatoria_empresa->alumnoReferencia->nombre 
-													: 'No asignado' }}
-											</td>
-											<td>
-												{{ $convocatoria_empresa->profesorReferencia 
-													? $convocatoria_empresa->profesorReferencia->nombre . ' ' . $convocatoria_empresa->profesorReferencia->apellido1 
-													: 'No asignado' }}
-											</td>
-											<td>{{ $empresa->telefono_contacto}}</td>
-											<td>{{ $empresa->correo_contacto}}</td>
-											<td>{{ $convocatoria_empresa->observaciones}}</td>
-											<td>
-												<form action="{{ route('enviar-correo-participar', ['empresa' => $empresa->id, 'convocatoria' => $convocatoria->id]) }}" method="POST" id="participarForm-{{ $empresa->id }}">
-													@csrf
-													<button type="button" class="btn btn-primary btn-sm" onclick="showConfirmationModalParticipar('{{ $empresa->nombre ?? '' }}', {{ $empresa->id }})">Participar</button>
-												</form>
-											</td>
-											<!-- Modal de confirmación -->
-											<div class="modal fade" id="confirmationModalParticipar" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-												<div class="modal-dialog" role="document">
-													<div class="modal-content">
-														<div class="modal-header">
-															<h5 class="modal-title" id="modalTitle">Confirmación</h5>
-															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">&times;</span>
-															</button>
-														</div>
-														<div class="modal-body">
-															<p id="modalMessageParticipar"></p>
-														</div>
-														<div class="modal-footer">
-															<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-															<button type="button" class="btn btn-primary" id="confirmButton2">Confirmar</button>
-
-
-														</div>
-													</div>
-												</div>
-											</div>
-											<td>
-												<button type="button" class="btn btn-primary btn-sm btn-ver-detalles" title="Ver detalles participación" data-toggle="modal" data-target="#modalPlazas{{ $empresa->id }}" data-nombre-empresa="{{ $empresa->nombre }}">
-													<i class="fas fa-eye"></i>
-												</button> @foreach ($convocatoriaEmpresaPlazas as $plaza)
-												<!-- Modal -->
-												<div class="modal fade" id="modalPlazas{{ $empresa->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-													<div class="modal-dialog" role="document">
-														<div class="modal-content">
-															<div class="modal-header">
-																<h5 class="modal-title" id="exampleModalLabel">Detalle de Todas las Plazas</h5>
-																<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">&times;</span>
-															</button>
-															</div>
-															<div class="modal-body">
-																<p><strong>Nombre empresa:</strong> {{ $empresa->nombre }}</p>
-
-																@foreach ($convocatoriaEmpresaPlazas->where('empresa_id', $empresa->id) as $plazaEmpresa)
-																<p><strong>Ciclo:</strong> {{ $plazaEmpresa->ciclo ? $plazaEmpresa->ciclo->ciclo : 'N/A' }}</p>
-																<p><strong>Número de plazas:</strong> {{ $plazaEmpresa->numero_plazas }}</p>
-																<p><strong>Perfil:</strong> {{ $plazaEmpresa->perfil }}</p>
-																<p><strong>Tareas:</strong> {{ $plazaEmpresa->tareas }}</p>
-																<p><strong>Observaciones:</strong> {{ $plazaEmpresa->observaciones }}</p>
-																@endforeach
-															</div>
-															<div class="modal-footer">
-																<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+										@foreach($convocatoria_empresas as $convocatoria_empresa)
+											@php 
+												$empresa = $convocatoria_empresa->empresa; 
+												$plazas = $convocatoria_empresa->ofertaPlazas;
+											@endphp
+											<tr>
+												<td>{{ $empresa->nombre }}</td>
+												<td>{{ $empresa->persona_contacto }}</td>
+												<td>
+													{{ $convocatoria_empresa->alumnoReferencia 
+														? $convocatoria_empresa->alumnoReferencia->apellido1 . ' ' . $convocatoria_empresa->alumnoReferencia->apellido2 . ' ' . $convocatoria_empresa->alumnoReferencia->nombre 
+														: 'No asignado' }}
+												</td>
+												<td>
+													{{ $convocatoria_empresa->profesorReferencia 
+														? $convocatoria_empresa->profesorReferencia->nombre . ' ' . $convocatoria_empresa->profesorReferencia->apellido1 
+														: 'No asignado' }}
+												</td>
+												<td>{{ $empresa->telefono_contacto }}</td>
+												<td>{{ $empresa->correo_contacto }}</td>
+												<td>{{ $convocatoria_empresa->observaciones }}</td>
+												<td>
+													<form action="{{ route('enviar-correo-participar', ['empresa' => $empresa->id, 'convocatoria' => $convocatoria->id]) }}" method="POST" id="participarForm-{{ $empresa->id }}">
+														@csrf
+														<button type="button" class="btn btn-primary btn-sm" onclick="showConfirmationModalParticipar('{{ $empresa->nombre ?? '' }}', {{ $empresa->id }})">Participar</button>
+													</form>
+												</td>
+												<td>
+													<button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#plazasCollapse{{ $empresa->id }}">
+														<i class="fa fa-eye" title="Ver plazas"></i> 
+													</button>
+													<a class="btn btn-sm btn-success" title="Editar" href="{{ route('convocatoria.editEmpresa', [$convocatoria->id, $empresa->id]) }}">
+														<i class="fa fa-fw fa-edit"></i>
+													</a>
+													<button type="button" class="btn btn-sm btn-danger" title="Eliminar de la convocatoria" data-toggle="modal" data-target="#confirmModal{{ $convocatoria_empresa->id }}">
+														<i class="fa fa-fw fa-trash"></i>
+													</button>
+													<!-- Modal de confirmación de eliminación -->
+													<div class="modal fade" id="confirmModal{{ $convocatoria_empresa->id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel{{ $convocatoria_empresa->id }}" aria-hidden="true">
+														<div class="modal-dialog" role="document">
+															<div class="modal-content">
+																<div class="modal-header">
+																	<h5 class="modal-title" id="confirmModalLabel{{ $convocatoria_empresa->id }}">Confirmar Eliminación</h5>
+																	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																		<span aria-hidden="true">&times;</span>
+																	</button>
+																</div>
+																<div class="modal-body">
+																	¿Estás seguro de que quieres eliminar la empresa de la convocatoria?
+																</div>
+																<div class="modal-footer">
+																	<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+																	<form action="{{ route('convocatoria_empresas.destroy', $convocatoria_empresa->id) }}" method="POST">
+																		@csrf @method('DELETE')
+																		<button type="submit" class="btn btn-danger">Eliminar de Convocatoria</button>
+																	</form>
+																</div>
 															</div>
 														</div>
 													</div>
-												</div>
-												@endforeach
-
-
-												<a class="btn btn-sm btn-success" title="Editar" href="{{ route('convocatoria.editEmpresa', [$convocatoria->id, $empresa->id]) }}">
-													<i class="fa fa-fw fa-edit"></i>
-												</a>
-												<button type="button" class="btn btn-sm btn-danger" title="Eliminar de la convocatoria" data-toggle="modal" data-target="#confirmModal{{ $convocatoria_empresa->id }}">
-												<i class="fa fa-fw fa-trash"></i>
-											</button>
-
-												<div class="modal fade" id="confirmModal{{ $convocatoria_empresa->id }}" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel{{ $convocatoria_empresa->id }}" aria-hidden="true">
-													<div class="modal-dialog" role="document">
-														<div class="modal-content">
-															<div class="modal-header">
-																<h5 class="modal-title" id="confirmModalLabel{{ $convocatoria_empresa->id }}">Confirmar Eliminación</h5>
-																<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																	<span aria-hidden="true">&times;</span>
-																</button>
-															</div>
-															<div class="modal-body">
-																¿Estás seguro de que quieres eliminar la empresa de la convocatoria?
-															</div>
-															<div class="modal-footer">
-																<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-																<form action="{{ route('convocatoria_empresas.destroy', $convocatoria_empresa->id) }}" method="POST">
-																	@csrf @method('DELETE')
-																	<button type="submit" class="btn btn-danger">Eliminar de Convocatoria</button>
-																</form>
-															</div>
-														</div>
+												</td>
+											</tr>
+											<tr class="collapse" id="plazasCollapse{{ $empresa->id }}">
+												<td colspan="9">
+													<div class="card card-body">
+														<table class="table table-sm mb-0">
+															<thead>
+																<tr>
+																	<th>Especialidad</th>
+																	<th>Plazas</th>
+																	<th>Perfil</th>
+																	<th>Tareas</th>
+																	<th>Observaciones</th>
+																</tr>
+															</thead>
+															<tbody>
+																@if($plazas->isEmpty())
+																	<tr>
+																		<td colspan="5" class="text-center">No hay plazas asignadas</td>
+																	</tr>
+																@else
+																	@foreach($plazas as $plaza)
+																		<tr>
+																			<td>{{ $plaza->especialidad }}</td>
+																			<td>{{ $plaza->plazas }}</td>
+																			<td>{{ $plaza->perfil ?? 'No asignado' }}</td>
+																			<td>{{ $plaza->tareas ?? 'No asignado' }}</td>
+																			<td>{{ $plaza->observaciones ?? 'No asignado' }}</td>
+																		</tr>
+																	@endforeach
+																@endif
+															</tbody>
+														</table>
 													</div>
-											</td>
-										</tr>
+												</td>
+											</tr>
 										@endforeach
 									</tbody>
 								</table>
 								@endif
 							</div>
 
-							<div class="tab-pane fade" id="plazas">
+							{{-- <div class="tab-pane fade" id="plazas">
 								@foreach($convocatoria_empresas as $convocatoria_empresa)
 									@php 
 										$empresa = $convocatoria_empresa->empresa; 
@@ -367,7 +354,7 @@
 										</div>
 									</div>
 								@endforeach
-							</div>
+							</div> --}}
 					</div>
 				</div>
 			</div>
