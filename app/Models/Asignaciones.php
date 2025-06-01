@@ -15,7 +15,9 @@ class Asignaciones extends Model
         'alumnado_id',
         'empresa_id',
         'profesores_id',
-        // Otros campos aquí
+        'observaciones',
+        'enabled'
+
     ];
 
     // Relación 1:N con la tabla convocatorias

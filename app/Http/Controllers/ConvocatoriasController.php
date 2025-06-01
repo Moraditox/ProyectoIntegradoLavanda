@@ -118,7 +118,10 @@ class ConvocatoriasController extends Controller
                 $matricula->ciclo = 'No asignado';
             }
         }
-    
+
+        //Ordenamos los alumnos en función de si están habilitados o no
+        $matriculas = $matriculas->sortByDesc('enabled');
+        
         // Obtener los registros de curso_academico_alumno para los alumnos asociados a la convocatoria
         // $matriculas = \App\Models\Asignaciones::with(['alumnado', 'empresa', 'profesor'])
         //     ->whereIn('alumnado_id', $alumnosIds)
@@ -187,11 +190,31 @@ class ConvocatoriasController extends Controller
         $alumnoId = $request->alumnadoId;
         $empresaId = $request->empresaId;
         $profesorId = $request->profesorId;
+        $observaciones = $request->observaciones;
+        $alumnoEnabled = $request->habilitarAlumno;
+
+        \Log::info('editarAsignacionEmpresa variables', [
+            'alumnoId' => $alumnoId,
+            'empresaId' => $empresaId,
+            'profesorId' => $profesorId,
+            'observaciones' => $observaciones,
+            'alumnoEnabled' => $alumnoEnabled,
+            'convocatoriaId' => $request->convocatoriaId
+        ]);
+
 
         // Actualiza la asignación de la empresa y el profesor para el alumno
         Asignaciones::updateOrCreate(
-            ['alumnado_id' => $alumnoId],
-            ['empresa_id' => $empresaId, 'profesores_id' => $profesorId]
+            [
+                'alumnado_id' => $alumnoId,
+                'convocatoria_id' => $request->convocatoriaId
+            ],
+            [
+                'empresa_id' => $empresaId,
+                'profesores_id' => $profesorId,
+                'observaciones' => $observaciones,
+                'enabled' => $alumnoEnabled
+            ]
         );
 
         return response()->json(['success' => 'Datos actualizados correctamente.']);

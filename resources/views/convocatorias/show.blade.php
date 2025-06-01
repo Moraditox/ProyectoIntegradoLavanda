@@ -5,11 +5,16 @@
 		        color: black;
 		        text-decoration: none;
 		    }
+
+	.alumnoDisabledRow td{
+		background-color: #bbbbbb !important;
+	}
 		
 	
 </style>
 
 @section('content')
+<p hidden id="convocatoriaId">{{$convocatoria->id}}</p>	
 <section class="content container-fluid">
 	<div class="row">
 		<div class="col-md-12">
@@ -88,6 +93,7 @@
 											<th>Grupo</th>
 											<th>Empresa</th>
 											<th>Profesor</th>
+											<th>Observaciones</th>
 											<th>Acciones</th>
 										</tr>
 									</thead>
@@ -99,29 +105,46 @@
 										@else
 											@foreach($matriculas as $matricula) 
 												@php 
-													$empresa = optional($matricula->alumnado->asignaciones)->empresa; 
 													$alumno = $matricula->alumnado; 
 													$rutaAlumno = route('alumnos.infoAlumno', $alumno->id); 
+													$alumnoHabilitado = $matricula->enabled ? true : false;
 												@endphp
-												<tr class="matricula-row {{ empty(optional($matricula->alumnado->asignaciones)->empresa) ? 'sin-empresa' : '' }} {{ empty(optional($matricula->alumnado->asignaciones)->profesor) ? 'sin-profesor' : '' }}" data-matricula-id="{{$matricula->id}}">
+												<tr class="matricula-row 
+													{{ empty(optional($matricula->alumnado->asignaciones)->empresa) ? 'sin-empresa' : '' }} 
+													{{ empty(optional($matricula->alumnado->asignaciones)->profesor) ? 'sin-profesor' : '' }} 
+													{{ !$alumnoHabilitado ? 'alumnoDisabledRow' : '' }}"
+													data-matricula-id="{{$matricula->id}}">
 													<td style="width:250px">
 														<a href="{{ $rutaAlumno }}" class="enlace-alumno {{ (empty(optional($matricula->alumnado->asignaciones)->empresa) || empty(optional($matricula->alumnado->asignaciones)->profesor)) ? 'text-danger' : '' }}">{{ $alumno->apellido1 }} {{ $alumno->apellido2 }} {{ $alumno->nombre }}</a>
 													</td>
 													<td>{{ $matricula->ciclo }}</td>
-													<td>
-														@php $asignacionEmpresa = optional($matricula->alumnado->asignaciones)->empresa; @endphp 
-														@if($asignacionEmpresa) 
-															{{ $asignacionEmpresa->nombre }} 
+													<td data-empresa-id="{{ $matricula->empresa_id ?? '' }}">
+														@if(isset($matricula->empresa_id)) 
+															@php
+																$convEmpresa = $convocatoria_empresas->firstWhere('empresa_id', $matricula->empresa_id);
+																$empresa = $convEmpresa && $convEmpresa->empresa ? $convEmpresa->empresa : null;
+															@endphp
+															{{ $empresa ? $empresa->nombre : 'Sin asignación de empresa' }}
 														@else 
 															Sin asignación de empresa 
 														@endif
 													</td>
-													<td>
-														@php $asignacionProfesor = optional($matricula->alumnado->asignaciones)->profesor; @endphp 
-														@if($asignacionProfesor) 
-															{{ $asignacionProfesor->nombre }} {{ $asignacionProfesor->apellido1 }} 
+													<td data-profesor-id="{{ $matricula->profesores_id ?? '' }}">
+														@if (isset($matricula->profesores_id)) 
+															@php
+																$profesor = $profesores->firstWhere('id', $matricula->profesores_id);
+															@endphp
+															{{ $profesor ? $profesor->nombre : 'Sin profesor asignado' }}
 														@else 
-															Sin asignación de profesor 
+															Sin profesor asignado
+														@endif
+													</td>
+													{{-- Observaciones --}}												
+													<td>
+														@if(isset($matricula->observaciones)) 
+															{{ $matricula->observaciones }} 
+														@else 
+															Sin observaciones 
 														@endif
 													</td>
 													<td>
@@ -358,7 +381,6 @@
 					</div>
 				</div>
 			</div>
-
 </section>
 
 <!-- Modal de Informes -->
@@ -413,7 +435,6 @@
 
 <script>
 	$(document).ready(function () {
-		
 		$('.editarEmpresaBtn').on('click', function () {
 			var alumnadoId = $(this).data('alumnado-id');
 			$('#empresaSelect').data('alumnado-id', alumnadoId); // <-- Añade esto
@@ -447,40 +468,59 @@
 			// 	}
 			// });
 
-			$.ajax({
-				type: "GET",
-				url: "{{ url('profesores-disponibles') }}",
-				data: { alumnadoId: alumnadoId },
-				success: function (data) {
-					var profesorSelect = $('#profesorSelect');
-					profesorSelect.empty();
+			// Ponemos los valores de observaciones y habilitación del alumno en el modal
+			var asignacion = $(this).closest('tr').find('td:nth-child(5)').text().trim(); // Observaciones
+			var habilitado = !$(this).closest('tr').hasClass('alumnoDisabledRow'); // Verifica si la fila tiene la clase 'alumnoDisabledRow'
+			$('#observacionesInput').val(asignacion);
+			$('#habilitarAlumnoCheck').prop('checked', habilitado);
+			var empresaIdAsignada = $(this).closest('tr').find('td:nth-child(3)').data('empresa-id');
+			var profesorIdAsignado = $(this).closest('tr').find('td:nth-child(4)').data('profesor-id');
 
-					// Rellenar el select con los profesores disponibles
-					$.each(data.profesores, function (index, profesor) {
-						profesorSelect.append($('<option>', {
-							value: profesor.id,
-							text: profesor.nombre
-						}));
-					});
+			// Selecciona la empresa asignada si existe
+			if (empresaIdAsignada) {
+				$('#empresaSelect').val(empresaIdAsignada);
+			} else {
+				$('#empresaSelect').prop('selectedIndex', 0);
+			}
 
-					$('#editarEmpresaModal').modal('show');
-				},
-				error: function (xhr, status, error) {
-					console.error(xhr.responseText);
-					alert("Error al cargar los profesores. Intente nuevamente.");
-				}
-			});
+			if (profesorIdAsignado) {
+				$('#profesorSelect').val(profesorIdAsignado);
+			} else {
+				$('#profesorSelect').prop('selectedIndex', 0);
+			}
+			// $.ajax({
+			// 	type: "GET",
+			// 	url: "{{ url('profesores-disponibles') }}",
+			// 	data: { alumnadoId: alumnadoId },
+			// 	success: function (data) {
+			// 		var profesorSelect = $('#profesorSelect');
+			// 		profesorSelect.empty();
+
+			// 		// Rellenar el select con los profesores disponibles
+			// 		$.each(data.profesores, function (index, profesor) {
+			// 			profesorSelect.append($('<option>', {
+			// 				value: profesor.id,
+			// 				text: profesor.nombre
+			// 			}));
+			// 		});
+
+			// 		$('#editarEmpresaModal').modal('show');
+			// 	},
+			// 	error: function (xhr, status, error) {
+			// 		console.error(xhr.responseText);
+			// 		alert("Error al cargar los profesores. Intente nuevamente.");
+			// 	}
+			// });
 		});
 			
 		$('#guardarCambiosBtn').on('click', function () {
 			var alumnadoId = $('#empresaSelect').data('alumnado-id');
 			var selectedEmpresaId = $('#empresaSelect').val();
 			var selectedProfesorId = $('#profesorSelect').val(); 
-			var convocatoriaId = "{{ $convocatoria->id }}"; // Obtener la ID de la convocatoria
-			console.log("Convocatoria ID:", convocatoriaId);
-			console.log("Alumnado ID:", alumnadoId);
-			console.log("Empresa ID:", selectedEmpresaId);
-			console.log("Profesor ID:", selectedProfesorId);
+			var convocatoriaId = $('#convocatoriaId').text(); // Obtener el ID de la convocatoria desde el elemento oculto
+			var observaciones = $('#observacionesInput').val();
+			var habilitarAlumno = $('#habilitarAlumnoCheck').is(':checked') ? 1 : 0; // Obtener el estado del checkbox
+			console.log(convocatoriaId, habilitarAlumno);
 			$.ajax({
 				type: 'POST',
 				url: '{{ route("editar-asignacion-empresa") }}',
@@ -489,7 +529,9 @@
 					alumnadoId: alumnadoId,
 					empresaId: selectedEmpresaId,
 					profesorId: selectedProfesorId,
-					convocatoriaId: convocatoriaId // Enviar la URL/id de la convocatoria
+					convocatoriaId: convocatoriaId, // Enviar la URL/id de la convocatoria
+					observaciones: observaciones,
+					habilitarAlumno: habilitarAlumno // Enviar el estado del checkbox
 				},
 				success: function (response) {
 					location.reload();
@@ -623,6 +665,15 @@
                         @endforeach
                     @endisset
                 </select>
+				<br>
+				<div>Observaciones:</div>
+				<input type="text" id="observacionesInput" class="form-control" placeholder="Observaciones">
+
+				<br>
+				<div class="form-check">
+					<input type="checkbox" class="form-check-input" id="habilitarAlumnoCheck" checked>
+					<label class="form-check-label" for="habilitarAlumnoCheck">Alumno habilitado</label>
+				</div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="guardarCambiosBtn">Guardar Cambios</button>
