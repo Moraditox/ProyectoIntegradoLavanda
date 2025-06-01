@@ -95,20 +95,13 @@ class ConvocatoriasController extends Controller
 
         $convocatoriaEmpresaPlazas = Convocatoria_Empresa_Plaza::where('convocatoria_id', $convocatoria->id)->get();
         $actuaciones = Actuaciones::where('id', $convocatoria->id)->get();
-        $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
+        // $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
         $actuaciones = Actuaciones::all();
-
-        // Obtener las matrículas de los alumnos asociados a la convocatoria
-        // $matriculas = Matricula::with(['alumnado', 'alumnado.asignaciones.empresa'])
-        //     ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
-        //      ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
-        //      ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')->whereIn('alumno_id', $alumnosIds)
-        //      ->orderBy('ciclos.ciclo')
-        //      ->orderBy('alumnado.apellido1')->get();
 
         // Recuperamos todas las asignaciones de alumnos a esta convocatoria
         $matriculas = Asignaciones::with(['alumnado', 'empresa', 'profesor'])
-            ->whereIn('alumnado_id', $alumnosIds)
+            // ->whereIn('alumnado_id', $alumnosIds)
+            ->where('convocatoria_id', $convocatoria->id)
             ->get();
 
         // Recorremos cada matricula y recuperamos el ciclo del alumno
@@ -362,6 +355,22 @@ class ConvocatoriasController extends Controller
             Asignaciones::where('convocatoria_id', $convocatoria->id)->delete();
         } else {
             $convocatoria->ciclosDisponibles()->sync($cursos);
+
+            // Obtener todos los alumnos que pertenecen a los cursos seleccionados
+            $alumnosSeleccionados = collect();
+            foreach ($cursos as $curso) {
+                $alumnos = DB::table('curso_academico_alumno')
+                    ->where('ciclo_nombre', $curso)
+                    ->pluck('alumno_id');
+                $alumnosSeleccionados = $alumnosSeleccionados->merge($alumnos);
+            }
+            $alumnosSeleccionados = $alumnosSeleccionados->unique();
+
+            // Eliminar asignaciones de alumnos cuyos cursos ya no estén asociados a la convocatoria
+            Asignaciones::where('convocatoria_id', $convocatoria->id)
+                ->whereNotIn('alumnado_id', $alumnosSeleccionados)
+                ->delete();
+
             // Recorremos los cursos seleccionados y creamos una asignación para cada alumno solo si no existe
             foreach ($cursos as $curso) {
                 // Recuperamos los alumnos que pertenecen a este curso

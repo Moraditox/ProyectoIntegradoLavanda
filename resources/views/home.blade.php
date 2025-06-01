@@ -22,13 +22,13 @@
                     @endif
                     <div class="card-body">
                         @foreach ($convocatorias as $anno_academico => $convocatoriasPorAnno)
-                            <div class="card m-4  text-center">
+                            <div class="card m-4 text-center">
                                 <div class="card-header">
                                     {{ $anno_academico }}
                                 </div>
                                 <div class="card-body d-flex flex-row justify-content-around align-items-center">
-                                @foreach ($convocatoriasPorAnno as $convocatoria)
-    <div class="card @if ($convocatoria->estado == 'En proceso') border-success @elseif ($convocatoria->estado == 'Acabada') border-primary @endif">
+                                    @foreach ($convocatoriasPorAnno as $convocatoria)
+                                        <div class="card">
                                             <div class="card-header">
                                                 {{ $convocatoria->periodo }}
                                             </div>
@@ -57,9 +57,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="card-footer">
-
-                                </div>
+                                <div class="card-footer"></div>
                             </div>
                         @endforeach
                     </div>

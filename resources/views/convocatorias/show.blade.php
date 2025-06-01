@@ -47,7 +47,7 @@
 					<div style="margin:20px" class="card mt-4">
 						<ul style="gap:20px" class="nav nav-tabs">
 							<li class="nav-item">
-								<a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">FCT</a>
+								<a class="nav-link active" id="fct-tab" data-toggle="tab" href="#fct">FP DUAL</a>
 							</li>
 							<li class="nav-item">
 								<a class="nav-link" id="actuaciones-tab" data-toggle="tab" href="#actuaciones">Actuaciones</a>
@@ -85,7 +85,7 @@
 									<thead>
 										<tr>
 											<th>Alumno</th>
-											<th>Ciclo</th>
+											<th>Grupo</th>
 											<th>Empresa</th>
 											<th>Profesor</th>
 											<th>Acciones</th>
