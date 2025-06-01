@@ -426,143 +426,147 @@
 
 <script>
 	$(document).ready(function () {
-			            $('.editarEmpresaBtn').on('click', function () {
-			                var alumnadoId = $(this).data('alumnado-id');
-			
-			                $.ajax({
-			                    type: "GET",
-			                    url: "{{ route('empresasDisponibles', $convocatoria->id) }}",
-			                    success: function (empresas) {
-			                        var empresaSelect = $('#empresaSelect');
-			                        empresaSelect.empty(); 
-			
-			                        $.each(empresas, function (index, convocatoria_empresa) {
-                                    if (convocatoria_empresa.empresa) {
-                                        var nombreEmpresa = convocatoria_empresa.empresa.nombre;
-                                        var numeroPlazas = convocatoria_empresa.numero_plazas; // Número de plazas ofrecidas por la empresa
-                                        var optionText = nombreEmpresa + ' - Plazas: ' + numeroPlazas;
-                                        empresaSelect.append($('<option>', {
-                                            value: convocatoria_empresa.empresa.id,
-                                            text: optionText
-                                        }));
-                                    }
-                                });
-
-			                        empresaSelect.data('alumnado-id', alumnadoId);
-			
-			                        $('#editarEmpresaModal').modal('show');
-									$('#editarEmpresaModal .close').on('click', () => $('#editarEmpresaModal').modal('hide'))
-			                    },
-			                    error: function (xhr, status, error) {
-			                        console.error(xhr.responseText);
-			                        alert("Error al cargar las empresas. Intente nuevamente.");
-			                    }
-			                });
-			                $.ajax({
-			                    type: "GET",
-			                    url: "{{ url('profesores-disponibles') }}",
-			                    data: { alumnadoId: alumnadoId },
-			                    success: function (data) {
-			                        var profesorSelect = $('#profesorSelect');
-			                        profesorSelect.empty();
-			
-			                        // Rellenar el select con los profesores disponibles
-			                        $.each(data.profesores, function (index, profesor) {
-			                            profesorSelect.append($('<option>', {
-			                                value: profesor.id,
-			                                text: profesor.nombre
-			                            }));
-			                        });
-			
-			                        $('#editarEmpresaModal').modal('show');
-			                    },
-			                    error: function (xhr, status, error) {
-			                        console.error(xhr.responseText);
-			                        alert("Error al cargar los profesores. Intente nuevamente.");
-			                    }
-			                });
-			            });
-			
-			        $('#guardarCambiosBtn').on('click', function () {
-			            var alumnadoId = $('#empresaSelect').data('alumnado-id');
-			            var selectedEmpresaId = $('#empresaSelect').val();
-			            var selectedProfesorId = $('#profesorSelect').val(); 
-			
-			            $.ajax({
-			                type: 'POST',
-			                url: '{{ route("editar-asignacion-empresa") }}',
-			                data: {
-			                    _token: '{{ csrf_token() }}',
-			                    alumnadoId: alumnadoId,
-			                    empresaId: selectedEmpresaId,
-			                    profesorId: selectedProfesorId 
-			                },
-			                success: function (response) {
-			                    location.reload();
-			                },
-			                error: function () {
-			                    alert('Error al actualizar los datos. Intente nuevamente.');
-			                }
-			            });
-			        });
-			
-			        $(".asignar-btn").on("click", function () {
-			            var matriculaId = $(this).closest("tr.matricula-row").data("matricula-id");
-			            var selectedEmpresaId = $("#dropdown-" + matriculaId + " select[name='empresa_id']").val();
-			            var selectedProfesorId = $("#dropdown-profesor-" + matriculaId + " select[name='profesores_id']").val();
-			            var alumnoNombre = $("#dropdown-" + matriculaId + " select[name='empresa_id'] option:selected").data("alumno-nombre");
-			            var alumnoApellido = $("#dropdown-" + matriculaId + " select[name='empresa_id'] option:selected").data("alumno-apellido");
-			
-			            if (selectedEmpresaId) {
-			                asignarEmpresa(matriculaId, selectedEmpresaId);
-			            }
-			
-			            if (selectedProfesorId) {
-			                asignarProfesor(matriculaId, selectedProfesorId);
-			            }
-			        });
-			
-			        function asignarEmpresa(matriculaId, empresaId) {
-			            $.ajax({
-			                type: "POST",
-			                url: "{{ route('asignar-empresa') }}",
-			                data: {
-			                    _token: "{{ csrf_token() }}",
-			                    matriculaId: matriculaId,
-			                    selectedEmpresaId: empresaId
-			                },
-			                success: function (response) {
-			                    location.reload(); 
-			                },
-			                error: function (error) {
-			                    console.error(error);
-			                    alert("Ocurrió un error al asignar la empresa. Por favor, inténtalo de nuevo.");
-			                }
-			            });
-			        }
-			
-			        function asignarProfesor(matriculaId, profesorId) {
-			            $.ajax({
-			                type: "POST",
-			                url: "{{ route('asignar-profesor') }}", 
-			                data: {
-			                    _token: "{{ csrf_token() }}",
-			                    matriculaId: matriculaId,
-			                    selectedProfesorId: profesorId
-			                },
-			                success: function (response) {
-			                    location.reload(); 
-			                },
-			                error: function (error) {
-			                    console.error(error);
-			                    alert("Ocurrió un error al asignar el profesor. Por favor, inténtalo de nuevo.");
-			                }
-			            });
-			        }
-			    });
-			
 		
-	
+		$('.editarEmpresaBtn').on('click', function () {
+			var alumnadoId = $(this).data('alumnado-id');
+			$('#empresaSelect').data('alumnado-id', alumnadoId); // <-- Añade esto
+			// $.ajax({
+			// 	type: "GET",
+			// 	url: "{{ route('empresasDisponibles', $convocatoria->id) }}",
+			// 	success: function (empresas) {
+			// 		var empresaSelect = $('#empresaSelect');
+			// 		empresaSelect.empty(); 
+
+			// 		$.each(empresas, function (index, convocatoria_empresa) {
+			// 		if (convocatoria_empresa.empresa) {
+			// 			var nombreEmpresa = convocatoria_empresa.empresa.nombre;
+			// 			var numeroPlazas = convocatoria_empresa.numero_plazas; // Número de plazas ofrecidas por la empresa
+			// 			var optionText = nombreEmpresa + ' - Plazas: ' + numeroPlazas;
+			// 			empresaSelect.append($('<option>', {
+			// 				value: convocatoria_empresa.empresa.id,
+			// 				text: optionText
+			// 			}));
+			// 		}
+			// 	});
+
+			// 		empresaSelect.data('alumnado-id', alumnadoId);
+
+			// 		$('#editarEmpresaModal').modal('show');
+			// 		$('#editarEmpresaModal .close').on('click', () => $('#editarEmpresaModal').modal('hide'))
+			// 	},
+			// 	error: function (xhr, status, error) {
+			// 		console.error(xhr.responseText);
+			// 		alert("Error al cargar las empresas. Intente nuevamente.");
+			// 	}
+			// });
+
+			$.ajax({
+				type: "GET",
+				url: "{{ url('profesores-disponibles') }}",
+				data: { alumnadoId: alumnadoId },
+				success: function (data) {
+					var profesorSelect = $('#profesorSelect');
+					profesorSelect.empty();
+
+					// Rellenar el select con los profesores disponibles
+					$.each(data.profesores, function (index, profesor) {
+						profesorSelect.append($('<option>', {
+							value: profesor.id,
+							text: profesor.nombre
+						}));
+					});
+
+					$('#editarEmpresaModal').modal('show');
+				},
+				error: function (xhr, status, error) {
+					console.error(xhr.responseText);
+					alert("Error al cargar los profesores. Intente nuevamente.");
+				}
+			});
+		});
+			
+		$('#guardarCambiosBtn').on('click', function () {
+			var alumnadoId = $('#empresaSelect').data('alumnado-id');
+			var selectedEmpresaId = $('#empresaSelect').val();
+			var selectedProfesorId = $('#profesorSelect').val(); 
+			var convocatoriaId = "{{ $convocatoria->id }}"; // Obtener la ID de la convocatoria
+			console.log("Convocatoria ID:", convocatoriaId);
+			console.log("Alumnado ID:", alumnadoId);
+			console.log("Empresa ID:", selectedEmpresaId);
+			console.log("Profesor ID:", selectedProfesorId);
+			$.ajax({
+				type: 'POST',
+				url: '{{ route("editar-asignacion-empresa") }}',
+				data: {
+					_token: '{{ csrf_token() }}',
+					alumnadoId: alumnadoId,
+					empresaId: selectedEmpresaId,
+					profesorId: selectedProfesorId,
+					convocatoriaId: convocatoriaId // Enviar la URL/id de la convocatoria
+				},
+				success: function (response) {
+					location.reload();
+				},
+				error: function () {
+					alert('Error al actualizar los datos. Intente nuevamente.');
+				}
+			});
+		});
+
+		$(".asignar-btn").on("click", function () {
+			var matriculaId = $(this).closest("tr.matricula-row").data("matricula-id");
+			var selectedEmpresaId = $("#dropdown-" + matriculaId + " select[name='empresa_id']").val();
+			var selectedProfesorId = $("#dropdown-profesor-" + matriculaId + " select[name='profesores_id']").val();
+			var alumnoNombre = $("#dropdown-" + matriculaId + " select[name='empresa_id'] option:selected").data("alumno-nombre");
+			var alumnoApellido = $("#dropdown-" + matriculaId + " select[name='empresa_id'] option:selected").data("alumno-apellido");
+
+			if (selectedEmpresaId) {
+				asignarEmpresa(matriculaId, selectedEmpresaId);
+			}
+
+			if (selectedProfesorId) {
+				asignarProfesor(matriculaId, selectedProfesorId);
+			}
+		});
+
+		function asignarEmpresa(matriculaId, empresaId) {
+			$.ajax({
+				type: "POST",
+				url: "{{ route('asignar-empresa') }}",
+				data: {
+					_token: "{{ csrf_token() }}",
+					matriculaId: matriculaId,
+					selectedEmpresaId: empresaId
+				},
+				success: function (response) {
+					location.reload(); 
+				},
+				error: function (error) {
+					console.error(error);
+					alert("Ocurrió un error al asignar la empresa. Por favor, inténtalo de nuevo.");
+				}
+			});
+		}
+
+		function asignarProfesor(matriculaId, profesorId) {
+			$.ajax({
+				type: "POST",
+				url: "{{ route('asignar-profesor') }}", 
+				data: {
+					_token: "{{ csrf_token() }}",
+					matriculaId: matriculaId,
+					selectedProfesorId: profesorId
+				},
+				success: function (response) {
+					location.reload(); 
+				},
+				error: function (error) {
+					console.error(error);
+					alert("Ocurrió un error al asignar el profesor. Por favor, inténtalo de nuevo.");
+				}
+			});
+		}
+	});
 </script>
 <script>
 	function showConfirmationModalParticipar(nombreEmpresa, empresaId) {
@@ -601,30 +605,43 @@
 	
 </script>
 
+<!-- Modal de edición de empresa y profesor -->
 <div class="modal fade" id="editarEmpresaModal" tabindex="-1" role="dialog">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">Editar asignación de empresa y profesor</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar asignación de empresa y profesor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-			</div>
-			<div class="modal-body">
-				<div>Seleccione la empresa:</div>
-				<select id="empresaSelect" class="form-control">
-                </select><br>
-				<div>Seleccione el profesor:</div>
-				<select id="profesorSelect" class="form-control">
+            </div>
+            <div class="modal-body">
+                <div>Seleccione la empresa:</div>
+                <select id="empresaSelect" class="form-control">
+                    @foreach($convocatoria_empresas as $convocatoria_empresa)
+                        @if($convocatoria_empresa->empresa)
+                            <option value="{{ $convocatoria_empresa->empresa->id }}">
+                                {{ $convocatoria_empresa->empresa->nombre }}
+                            </option>
+                        @endif
+                    @endforeach
                 </select>
-			</div>
-
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="guardarCambiosBtn">Guardar Cambios</button>
-			</div>
-
-		</div>
-	</div>
+                <br>
+                <div>Seleccione el profesor:</div>
+                <select id="profesorSelect" class="form-control">
+                    <!-- Aquí puedes rellenar los profesores si los tienes en una variable -->
+                    @isset($profesores)
+                        @foreach($profesores as $profesor)
+                            <option value="{{ $profesor->id }}">{{ $profesor->nombre }}</option>
+                        @endforeach
+                    @endisset
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="guardarCambiosBtn">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @endsection
