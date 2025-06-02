@@ -70,10 +70,6 @@ class ConvocatoriasController extends Controller
             ];
         });
 
-        $empresasDisponibles = Empresa::whereDoesntHave('convocatorias', function ($query) use ($convocatoria) {
-            $query->where('convocatoria_id', $convocatoria->id);
-        })->get();
-
         // $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)->get();
         $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)
             ->with([
@@ -93,7 +89,6 @@ class ConvocatoriasController extends Controller
             $empresaId = $convocatoria_empresas->first()->empresa_id;
         }
 
-        $convocatoriaEmpresaPlazas = Convocatoria_Empresa_Plaza::where('convocatoria_id', $convocatoria->id)->get();
         $actuaciones = Actuaciones::where('id', $convocatoria->id)->get();
         // $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
         $actuaciones = Actuaciones::all();
@@ -104,7 +99,7 @@ class ConvocatoriasController extends Controller
             ->where('convocatoria_id', $convocatoria->id)
             ->get();
 
-        // Recorremos cada matricula y recuperamos el ciclo del alumno
+        // Recorremos cada matricula y recuperamos el ciclo del alumno y la especialidad del ciclo
         foreach ($matriculas as $matricula) {
             $cursoAcademico = DB::table('curso_academico_alumno')
                 ->where('alumno_id', $matricula->alumnado_id)
@@ -112,13 +107,21 @@ class ConvocatoriasController extends Controller
                 ->select('ciclo_nombre')
                 ->first();
 
+            $matricula->especialidad = 'No asignada'; 
+            $matricula->ciclo = 'No asignado';
+
             if ($cursoAcademico) {
                 $matricula->ciclo = $cursoAcademico->ciclo_nombre;
-            } else {
-                $matricula->ciclo = 'No asignado';
+                // Recuperamos la especialidad del ciclo
+                $especialidad = DB::table('ciclos_disponibles')
+                    ->where('nombre', $matricula->ciclo)
+                    ->value('especialidad');
+                if ($especialidad) {
+                    $matricula->especialidad = $especialidad;
+                }
             }
         }
-
+        
         //Ordenamos los alumnos en función de si están habilitados o no
         $matriculas = $matriculas->sortByDesc('enabled');
         
@@ -129,7 +132,7 @@ class ConvocatoriasController extends Controller
         
         $profesores = Profesores::all();
 
-        return view('convocatorias.show', compact('convocatoriaEmpresaPlazas', 'empresasDisponibles', 'convocatoria', 'convocatoria_cursos', 'convocatoria_empresas', 'actuaciones', 'matriculas', 'cursosUnicos', 'profesores', 'empresaId'));
+        return view('convocatorias.show', compact('convocatoria', 'convocatoria_cursos', 'convocatoria_empresas', 'actuaciones', 'matriculas', 'cursosUnicos', 'profesores', 'empresaId'));
     }
 
     // public function empresasDisponibles(Convocatorias $convocatoria)
@@ -187,11 +190,19 @@ class ConvocatoriasController extends Controller
 
     public function editarAsignacionEmpresa(Request $request)
     {
+        // Si el alumno está deshabilitado, ponemos la empresa y el profesor a null
+        if (!$request->habilitarAlumno) {
+            $request->merge([
+                'empresaId' => null,
+                'profesorId' => null
+            ]);
+        } 
+        $alumnoEnabled = $request->habilitarAlumno;
         $alumnoId = $request->alumnadoId;
         $empresaId = $request->empresaId;
         $profesorId = $request->profesorId;
         $observaciones = $request->observaciones;
-        $alumnoEnabled = $request->habilitarAlumno;
+        
 
         \Log::info('editarAsignacionEmpresa variables', [
             'alumnoId' => $alumnoId,

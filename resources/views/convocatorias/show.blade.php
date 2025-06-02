@@ -149,7 +149,7 @@
 														@endif
 													</td>
 													<td>
-														<button class="btn btn-success btn-sm editarEmpresaBtn" data-alumnado-id="{{ $matricula->alumnado->id }}" data-toggle="modal" data-target="#editarEmpresaModal">
+														<button class="btn btn-success btn-sm editarEmpresaBtn" data-alumnado-id="{{ $matricula->alumnado->id }}" data-especialidad="{{ $matricula->especialidad }}" data-toggle="modal" data-target="#editarEmpresaModal">
 															Asignar/Editar
 														</button>
 														<button class="btn btn-primary btn-sm informesBtn" data-alumno-id="{{ $alumno->id }}" data-toggle="modal" data-target="#informesModal">
@@ -433,56 +433,84 @@
 		
 	
 </script>
-
+<script>
+	const empresasConPlazas = @json($convocatoria_empresas->toArray());
+	const matriculas = Object.values(@json($matriculas->toArray()));
+</script>
 <script>
 	$(document).ready(function () {
 		$('.editarEmpresaBtn').on('click', function () {
 			var alumnadoId = $(this).data('alumnado-id');
-			$('#empresaSelect').data('alumnado-id', alumnadoId); // <-- Añade esto
-			// $.ajax({
-			// 	type: "GET",
-			// 	url: "{{ route('empresasDisponibles', $convocatoria->id) }}",
-			// 	success: function (empresas) {
-			// 		var empresaSelect = $('#empresaSelect');
-			// 		empresaSelect.empty(); 
+			$('#empresaSelect').data('alumnado-id', alumnadoId); 
 
-			// 		$.each(empresas, function (index, convocatoria_empresa) {
-			// 		if (convocatoria_empresa.empresa) {
-			// 			var nombreEmpresa = convocatoria_empresa.empresa.nombre;
-			// 			var numeroPlazas = convocatoria_empresa.numero_plazas; // Número de plazas ofrecidas por la empresa
-			// 			var optionText = nombreEmpresa + ' - Plazas: ' + numeroPlazas;
-			// 			empresaSelect.append($('<option>', {
-			// 				value: convocatoria_empresa.empresa.id,
-			// 				text: optionText
-			// 			}));
-			// 		}
-			// 	});
+			// Recuperamos la especialidad del alumnado
+			var especialidad = $(this).data('especialidad');
+			var empresaAsignada = $(this).closest('tr').find('td:nth-child(3)').data('empresa-id');
 
-			// 		empresaSelect.data('alumnado-id', alumnadoId);
+			// Filtramos las empresas con plazas para la especialidad
+			var empresasFiltradas = empresasConPlazas.filter(function(convEmpresa) {
+				if (!convEmpresa.oferta_plazas) return false;
+				return convEmpresa.oferta_plazas.some(function(plaza) {
+					return plaza.especialidad === especialidad;
+				});
+			});
 
-			// 		$('#editarEmpresaModal').modal('show');
-			// 		$('#editarEmpresaModal .close').on('click', () => $('#editarEmpresaModal').modal('hide'))
-			// 	},
-			// 	error: function (xhr, status, error) {
-			// 		console.error(xhr.responseText);
-			// 		alert("Error al cargar las empresas. Intente nuevamente.");
-			// 	}
-			// });
+			// Rellenamos el select
+			var $empresaSelect = $('#empresaSelect');
+			$empresaSelect.empty();
+			$empresaSelect.append('<option value="">Sin empresa</option>');
+			empresasFiltradas.forEach(function(convEmpresa) {
+				// Calculamos si la empresa tiene plazas disponibles
+				var plazasDisponibles = convEmpresa.oferta_plazas
+					.filter(function(plaza) {
+						return plaza.especialidad === especialidad;
+					})
+					.reduce(function(total, plaza) {
+						return total + plaza.plazas;
+					}, 0);
+
+				// Recorremos todos los campos de las columnas de la tabla de alumnos que coincidan con la especialidad
+				// Y restamos las plazas ocupadas
+				matriculas.forEach(function(matricula) {
+					if (matricula.especialidad === especialidad && matricula.empresa_id === convEmpresa.empresa_id) {
+						plazasDisponibles--;
+					}
+				});
+				
+				// Comprobamos si la empresa está asignada al alumnado
+				var isEmpresaAsignada = convEmpresa.empresa_id === empresaAsignada;
+
+				if (convEmpresa.empresa) {
+					
+					let textoOpcion = convEmpresa.empresa.nombre;
+					if (plazasDisponibles > 0) {
+						textoOpcion += " | " + plazasDisponibles + " Plaza/s disponibles";
+						$empresaSelect.append(
+							$('<option>', {
+								value: convEmpresa.empresa.id,
+								text: textoOpcion
+							})
+						);
+					} else {
+						textoOpcion += " | Sin plazas disponibles";
+						$empresaSelect.append(
+							$('<option>', {
+								value: convEmpresa.empresa.id,
+								text: textoOpcion,
+								disabled: !isEmpresaAsignada,
+								selected: isEmpresaAsignada
+							})
+						);
+					}
+				}
+			});
 
 			// Ponemos los valores de observaciones y habilitación del alumno en el modal
 			var asignacion = $(this).closest('tr').find('td:nth-child(5)').text().trim(); // Observaciones
 			var habilitado = !$(this).closest('tr').hasClass('alumnoDisabledRow'); // Verifica si la fila tiene la clase 'alumnoDisabledRow'
 			$('#observacionesInput').val(asignacion);
 			$('#habilitarAlumnoCheck').prop('checked', habilitado);
-			var empresaIdAsignada = $(this).closest('tr').find('td:nth-child(3)').data('empresa-id');
 			var profesorIdAsignado = $(this).closest('tr').find('td:nth-child(4)').data('profesor-id');
-
-			// Selecciona la empresa asignada si existe
-			if (empresaIdAsignada) {
-				$('#empresaSelect').val(empresaIdAsignada);
-			} else {
-				$('#empresaSelect').prop('selectedIndex', 0);
-			}
 
 			if (profesorIdAsignado) {
 				$('#profesorSelect').val(profesorIdAsignado);
@@ -521,7 +549,7 @@
 			var convocatoriaId = $('#convocatoriaId').text(); // Obtener el ID de la convocatoria desde el elemento oculto
 			var observaciones = $('#observacionesInput').val();
 			var habilitarAlumno = $('#habilitarAlumnoCheck').is(':checked') ? 1 : 0; // Obtener el estado del checkbox
-			console.log(convocatoriaId, habilitarAlumno);
+			console.log(selectedEmpresaId);
 			$.ajax({
 				type: 'POST',
 				url: '{{ route("editar-asignacion-empresa") }}',
@@ -648,14 +676,14 @@
             <div class="modal-body">
                 <div>Seleccione la empresa:</div>
 				<select id="empresaSelect" class="form-control">
-					<option value="" selected>Sin empresa</option>
+					{{-- <option value="" selected>Sin empresa</option>
 					@foreach($convocatoria_empresas as $convocatoria_empresa)
 						@if($convocatoria_empresa->empresa)
 							<option value="{{ $convocatoria_empresa->empresa->id }}">
 								{{ $convocatoria_empresa->empresa->nombre }}
 							</option>
 						@endif
-					@endforeach
+					@endforeach --}}
 				</select>
 				<br>
 				<div>Seleccione el profesor:</div>
