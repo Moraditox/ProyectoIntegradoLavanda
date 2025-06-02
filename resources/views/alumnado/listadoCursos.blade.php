@@ -23,35 +23,41 @@
                 <div class="card-header text-center">{{ $anno->anno }}</div>
                 <div class="card-body">
                     @foreach ($cursos as $curso)
-                        <div class="card m-4">
-                            <div class="card-header text-center">{{ $curso[0]['ciclo'] }}</div>
-                            <div class="card-body d-flex justify-content-around flex-wrap">
-                                @for ($i = 0; $i < count($curso); $i++)
+                        @php
+                            $cursosConAlumnos = [];
+                            foreach ($curso as $c) {
+                                $alumnos = DB::table('matricula')
+                                    ->where('anno_academico', '=', $anno->anno)
+                                    ->where('curso_academico_id', '=', $c['id'])
+                                    ->count();
+                                if ($alumnos > 0) {
+                                    $c['alumnos'] = $alumnos;
+                                    $cursosConAlumnos[] = $c;
+                                }
+                            }
+                        @endphp
+                        @if (count($cursosConAlumnos) > 0)
+                            <h5 class="mt-4 mb-3 text-center">{{ $curso[0]['ciclo'] }}</h5>
+                            <div class="d-flex justify-content-around flex-wrap">
+                                @foreach ($cursosConAlumnos as $c)
                                     <div class="card m-2 text-center" style="width: 40%">
                                         <div class="card-header">
-                                            {{ $curso[$i]['curso'] . 'º ' . $curso[$i]['grupo'] . ' ' . $curso[$i]['turno'] }}
+                                            {{ $c['curso'] . 'º ' . $c['grupo'] . ' ' . $c['turno'] }}
                                         </div>
                                         <div class="card-body">
-                                            <?php
-                                            $alumnos = DB::table('matricula')
-                                                ->where('anno_academico', '=', $anno->anno)
-                                                ->where('curso_academico_id', '=', $curso[$i]['id'])
-                                                ->count();
-                                            ?>
-                                            <code>{{ 'Hay ' . $alumnos . ' alumnos matriculados.' }}</code>
+                                            <code>{{ 'Hay ' . $c['alumnos'] . ' alumnos matriculados.' }}</code>
                                         </div>
                                         <div class="card-footer">
-                                            <?php
-                                            $anio = str_replace('/', '-', $anno->anno);
-                                            ?>
-                                            <a href="{{ route('alumnos.infoCurso', ['anno' => $anio, 'curso' => $curso[$i]['id']]) }}"
+                                            @php
+                                                $anio = str_replace('/', '-', $anno->anno);
+                                            @endphp
+                                            <a href="{{ route('alumnos.infoCurso', ['anno' => $anio, 'curso' => $c['id']]) }}"
                                                 class="btn btn-primary">Ver alumnos</a>
                                         </div>
                                     </div>
-                                @endfor
+                                @endforeach
                             </div>
-                            <div class="card-footer"></div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
                 <div class="card-footer"></div>
