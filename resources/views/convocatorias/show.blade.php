@@ -647,25 +647,26 @@
             </div>
             <div class="modal-body">
                 <div>Seleccione la empresa:</div>
-                <select id="empresaSelect" class="form-control">
-                    @foreach($convocatoria_empresas as $convocatoria_empresa)
-                        @if($convocatoria_empresa->empresa)
-                            <option value="{{ $convocatoria_empresa->empresa->id }}">
-                                {{ $convocatoria_empresa->empresa->nombre }}
-                            </option>
-                        @endif
-                    @endforeach
-                </select>
-                <br>
-                <div>Seleccione el profesor:</div>
-                <select id="profesorSelect" class="form-control">
-                    <!-- Aquí puedes rellenar los profesores si los tienes en una variable -->
-                    @isset($profesores)
-                        @foreach($profesores as $profesor)
-                            <option value="{{ $profesor->id }}">{{ $profesor->nombre }}</option>
-                        @endforeach
-                    @endisset
-                </select>
+				<select id="empresaSelect" class="form-control">
+					<option value="" selected>Sin empresa</option>
+					@foreach($convocatoria_empresas as $convocatoria_empresa)
+						@if($convocatoria_empresa->empresa)
+							<option value="{{ $convocatoria_empresa->empresa->id }}">
+								{{ $convocatoria_empresa->empresa->nombre }}
+							</option>
+						@endif
+					@endforeach
+				</select>
+				<br>
+				<div>Seleccione el profesor:</div>
+				<select id="profesorSelect" class="form-control">
+					<option value="" selected>Sin profesor</option>
+					@isset($profesores)
+						@foreach($profesores as $profesor)
+							<option value="{{ $profesor->id }}">{{ $profesor->nombre }}</option>
+						@endforeach
+					@endisset
+				</select>
 				<br>
 				<div>Observaciones:</div>
 				<input type="text" id="observacionesInput" class="form-control" placeholder="Observaciones">
