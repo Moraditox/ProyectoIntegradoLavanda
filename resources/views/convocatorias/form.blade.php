@@ -1,77 +1,66 @@
 <div class="box box-info padding-1">
     <div class="box-body">
-
-        <div class="form-group">
-            {{ Form::label('periodo') }}
-            {{ Form::text('periodo', $convocatoria->periodo, ['class' => 'form-control' . ($errors->has('periodo') ? ' is-invalid' : ''), 'placeholder' => 'Periodo']) }}
-            {!! $errors->first('periodo', '<div class="invalid-feedback">:message</div>') !!}
+        <div class="row">
+            <div class="form-group col-md-4">
+                {{ Form::label('periodo') }}
+                {{ Form::text('periodo', $convocatoria->periodo, ['class' => 'form-control' . ($errors->has('periodo') ? ' is-invalid' : ''), 'placeholder' => 'Periodo']) }}
+                {!! $errors->first('periodo', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
+            <div class="form-group col-md-4">
+                {{ Form::label('fecha_inicio') }}
+                {{ Form::date('fecha_inicio', $convocatoria->fecha_inicio, ['class' => 'form-control' . ($errors->has('fecha_inicio') ? ' is-invalid' : '')]) }}
+                {!! $errors->first('fecha_inicio', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
+            <div class="form-group col-md-4">
+                {{ Form::label('fecha_fin') }}
+                {{ Form::date('fecha_fin', $convocatoria->fecha_fin, ['class' => 'form-control' . ($errors->has('fecha_fin') ? ' is-invalid' : '')]) }}
+                {!! $errors->first('fecha_fin', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
         </div>
-        <div class="form-group">
-            {{ Form::label('fecha_inicio') }}
-            {{ Form::date('fecha_inicio', $convocatoria->fecha_inicio, ['class' => 'form-control' . ($errors->has('fecha_inicio') ? ' is-invalid' : '')]) }}
-            {!! $errors->first('fecha_inicio', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        <div class="form-group">
-            {{ Form::label('fecha_fin') }}
-            {{ Form::date('fecha_fin', $convocatoria->fecha_fin, ['class' => 'form-control' . ($errors->has('fecha_fin') ? ' is-invalid' : '')]) }}
-            {!! $errors->first('fecha_fin', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        <div class="form-group">
-            {{ Form::label('observaciones') }}
-            {{ Form::text('observaciones', $convocatoria->observaciones, ['class' => 'form-control' . ($errors->has('observaciones') ? ' is-invalid' : ''), 'placeholder' => 'Observaciones']) }}
-            {!! $errors->first('observaciones', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        <div class="form-group">
-            {{ Form::label('anno_academico', 'Año Académico') }}
-            {{ Form::text('anno_academico', $annoAcademico->years, ['class' => 'form-control', 'disabled' => true, 'placeholder' => 'Año Académico']) }}
-            {{ Form::hidden('anno_academico', $annoAcademico->id) }}
-            {!! $errors->first('anno_academico', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        <div class="form-group">
-            {{ Form::label('curso_academico[]', 'Cursos Académicos', ['class' => 'mb-2']) }}
-            <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
+        <div class="row">
+            <div class="form-group col-md-4">
+                {{ Form::label('observaciones') }}
+                {{ Form::text('observaciones', $convocatoria->observaciones, ['class' => 'form-control' . ($errors->has('observaciones') ? ' is-invalid' : ''), 'placeholder' => 'Observaciones']) }}
+                {!! $errors->first('observaciones', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
+            <div class="form-group col-md-4">
+                {{ Form::label('anno_academico', 'Año Académico') }}
+                {{ Form::text('anno_academico', $annoAcademico->years, [
+                    'class' => 'form-control',
+                    'disabled' => true,
+                    'placeholder' => 'Año Académico'
+                ]) }}
+                {{ Form::hidden('anno_academico', $annoAcademico->id) }}
+                {!! $errors->first('anno_academico', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
+            <div class="form-group col-md-4">
+                {{ Form::label('curso_academico[]', 'Cursos Académicos', ['class' => 'mb-2']) }}
                 <select class="form-control select2" name="curso_academico[]" multiple>
                     <option value="" disabled>Selecciona los cursos académicos</option>
                     @foreach ($cursos as $curso)
-                        <option value="{{ $curso }}" selected>{{ $curso }}</option>
-                    @endforeach
-                </select>
-            </div>
-            {!! $errors->first('curso_academico', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        <div class="form-group">
-            {{ Form::label('estado', 'Estado') }}
-            <select class="form-control select2" name="estado">
-                <option value="" disabled {{ empty(old('estado', $convocatoria->estado)) ? 'selected' : '' }}>Selecciona el estado</option>
-                <option value="Activa" {{ (old('estado', $convocatoria->estado) == 'Activa') ? 'selected' : '' }}>Activa</option>
-                <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación' || (empty(old('estado', $convocatoria->estado)) && !isset($convocatoria->estado))) ? 'selected' : '' }}>Preparación</option>
-                <option value="Terminada" {{ (old('estado', $convocatoria->estado) == 'Terminada') ? 'selected' : '' }}>Terminada</option>
-            </select>
-            {!! $errors->first('estado', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
-        {{-- Este es el campo para añadir empresas --}}
-        {{-- <div class="form-group">
-            {{ Form::label('empresas[]', 'Empresas', ['class' => 'mb-2']) }}
-            <div class="form-group d-flex flex-row flex-wrap justify-content-between align-items-center">
-                <select class="form-control select2" name="empresas[]" multiple>
-                    <option value="" disabled>Selecciona las empresas</option>
-                    @foreach ($empresas as $empresaValue => $empresaLabel)
-                        @php
-                        if (isset($empresasSeleccionadas)) {
-                            $isSelected = in_array($empresaValue, $empresasSeleccionadas); // Verificar si la empresa está seleccionada previamente
-                        }
-                        @endphp
-                        @if (isset($isSelected)) {
-                            <option value="{{ $empresaValue }}" {{ $isSelected ? 'selected' : '' }}>{{ $empresaLabel }}</option>
-                        }
+                        @if (isset($cursosSeleccionados))
+                            <option value="{{ $curso }}" {{ in_array($curso, $cursosSeleccionados) ? 'selected' : '' }}>{{ $curso }}</option>
                         @else
-                            <option value="{{ $empresaValue }}">{{ $empresaLabel }}</option>
+                            <option value="{{ $curso }}" selected>{{ $curso }}</option>
                         @endif
                     @endforeach
                 </select>
+                {!! $errors->first('curso_academico', '<div class="invalid-feedback">:message</div>') !!}
             </div>
-            {!! $errors->first('empresas', '<div class="invalid-feedback">:message</div>') !!}
-        </div> --}}
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                {{ Form::label('estado', 'Estado') }}
+                <select class="form-control select2" name="estado">
+                    <option value="" disabled {{ empty(old('estado', $convocatoria->estado)) ? 'selected' : '' }}>Selecciona el estado</option>
+                    <option value="Activa" {{ (old('estado', $convocatoria->estado) == 'Activa') ? 'selected' : '' }}>Activa</option>
+                    <option value="Preparación" {{ (old('estado', $convocatoria->estado) == 'Preparación' || (empty(old('estado', $convocatoria->estado)) && !isset($convocatoria->estado))) ? 'selected' : '' }}>Preparación</option>
+                    <option value="Terminada" {{ (old('estado', $convocatoria->estado) == 'Terminada') ? 'selected' : '' }}>Terminada</option>
+                </select>
+                {!! $errors->first('estado', '<div class="invalid-feedback">:message</div>') !!}
+            </div>
+            {{-- Puedes añadir más campos aquí si lo necesitas para completar la fila de 3 --}}
+        </div>
         <script>
             $(document).ready(function() {
                 $('.select2').select2({
@@ -86,6 +75,6 @@
     </div>
     <div class="box-footer mt-2">
         <button type="submit" class="btn btn-primary">{{ __('Enviar') }}</button>
-        <a href="{{ route('convocatorias.index') }}" class="btn btn-danger">{{ __('Cancelar') }}</a>
+        <a href="{{ url()->previous() }}" class="btn btn-danger">{{ __('Cancelar') }}</a>
     </div>
 </div>

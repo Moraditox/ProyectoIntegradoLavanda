@@ -70,10 +70,6 @@ class ConvocatoriasController extends Controller
             ];
         });
 
-        $empresasDisponibles = Empresa::whereDoesntHave('convocatorias', function ($query) use ($convocatoria) {
-            $query->where('convocatoria_id', $convocatoria->id);
-        })->get();
-
         // $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)->get();
         $convocatoria_empresas = Convocatoria_Empresa::where('convocatoria_id', $convocatoria->id)
             ->with([
@@ -93,25 +89,17 @@ class ConvocatoriasController extends Controller
             $empresaId = $convocatoria_empresas->first()->empresa_id;
         }
 
-        $convocatoriaEmpresaPlazas = Convocatoria_Empresa_Plaza::where('convocatoria_id', $convocatoria->id)->get();
         $actuaciones = Actuaciones::where('id', $convocatoria->id)->get();
-        $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
+        // $alumnosIds = $convocatoria->asignaciones()->pluck('alumnado_id');
         $actuaciones = Actuaciones::all();
-
-        // Obtener las matrículas de los alumnos asociados a la convocatoria
-        // $matriculas = Matricula::with(['alumnado', 'alumnado.asignaciones.empresa'])
-        //     ->join('alumnado', 'matricula.alumno_id', '=', 'alumnado.id')
-        //      ->join('curso_academico', 'matricula.curso_academico_id', '=', 'curso_academico.id')
-        //      ->join('ciclos', 'curso_academico.ciclo', '=', 'ciclos.ciclo')->whereIn('alumno_id', $alumnosIds)
-        //      ->orderBy('ciclos.ciclo')
-        //      ->orderBy('alumnado.apellido1')->get();
 
         // Recuperamos todas las asignaciones de alumnos a esta convocatoria
         $matriculas = Asignaciones::with(['alumnado', 'empresa', 'profesor'])
-            ->whereIn('alumnado_id', $alumnosIds)
+            // ->whereIn('alumnado_id', $alumnosIds)
+            ->where('convocatoria_id', $convocatoria->id)
             ->get();
 
-        // Recorremos cada matricula y recuperamos el ciclo del alumno
+        // Recorremos cada matricula y recuperamos el ciclo del alumno y la especialidad del ciclo
         foreach ($matriculas as $matricula) {
             $cursoAcademico = DB::table('curso_academico_alumno')
                 ->where('alumno_id', $matricula->alumnado_id)
@@ -119,13 +107,24 @@ class ConvocatoriasController extends Controller
                 ->select('ciclo_nombre')
                 ->first();
 
+            $matricula->especialidad = 'No asignada'; 
+            $matricula->ciclo = 'No asignado';
+
             if ($cursoAcademico) {
                 $matricula->ciclo = $cursoAcademico->ciclo_nombre;
-            } else {
-                $matricula->ciclo = 'No asignado';
+                // Recuperamos la especialidad del ciclo
+                $especialidad = DB::table('ciclos_disponibles')
+                    ->where('nombre', $matricula->ciclo)
+                    ->value('especialidad');
+                if ($especialidad) {
+                    $matricula->especialidad = $especialidad;
+                }
             }
         }
-    
+        
+        //Ordenamos los alumnos en función de si están habilitados o no
+        $matriculas = $matriculas->sortByDesc('enabled');
+        
         // Obtener los registros de curso_academico_alumno para los alumnos asociados a la convocatoria
         // $matriculas = \App\Models\Asignaciones::with(['alumnado', 'empresa', 'profesor'])
         //     ->whereIn('alumnado_id', $alumnosIds)
@@ -133,7 +132,7 @@ class ConvocatoriasController extends Controller
         
         $profesores = Profesores::all();
 
-        return view('convocatorias.show', compact('convocatoriaEmpresaPlazas', 'empresasDisponibles', 'convocatoria', 'convocatoria_cursos', 'convocatoria_empresas', 'actuaciones', 'matriculas', 'cursosUnicos', 'profesores', 'empresaId'));
+        return view('convocatorias.show', compact('convocatoria', 'convocatoria_cursos', 'convocatoria_empresas', 'actuaciones', 'matriculas', 'cursosUnicos', 'profesores', 'empresaId'));
     }
 
     // public function empresasDisponibles(Convocatorias $convocatoria)
@@ -191,14 +190,42 @@ class ConvocatoriasController extends Controller
 
     public function editarAsignacionEmpresa(Request $request)
     {
+        // Si el alumno está deshabilitado, ponemos la empresa y el profesor a null
+        if (!$request->habilitarAlumno) {
+            $request->merge([
+                'empresaId' => null,
+                'profesorId' => null
+            ]);
+        } 
+        $alumnoEnabled = $request->habilitarAlumno;
         $alumnoId = $request->alumnadoId;
         $empresaId = $request->empresaId;
         $profesorId = $request->profesorId;
+        $observaciones = $request->observaciones;
+        
+
+        \Log::info('editarAsignacionEmpresa variables', [
+            'alumnoId' => $alumnoId,
+            'empresaId' => $empresaId,
+            'profesorId' => $profesorId,
+            'observaciones' => $observaciones,
+            'alumnoEnabled' => $alumnoEnabled,
+            'convocatoriaId' => $request->convocatoriaId
+        ]);
+
 
         // Actualiza la asignación de la empresa y el profesor para el alumno
         Asignaciones::updateOrCreate(
-            ['alumnado_id' => $alumnoId],
-            ['empresa_id' => $empresaId, 'profesores_id' => $profesorId]
+            [
+                'alumnado_id' => $alumnoId,
+                'convocatoria_id' => $request->convocatoriaId
+            ],
+            [
+                'empresa_id' => $empresaId,
+                'profesores_id' => $profesorId,
+                'observaciones' => $observaciones,
+                'enabled' => $alumnoEnabled
+            ]
         );
 
         return response()->json(['success' => 'Datos actualizados correctamente.']);
@@ -256,24 +283,25 @@ class ConvocatoriasController extends Controller
         $convocatoria->save();
 
         $cursos = $request->input('curso_academico');
-        $convocatoria_cursos = array();
     
         // Guardamos los cursos asignados 
         $convocatoria->ciclosDisponibles()->attach($cursos);
 
         // Recorremos los cursos seleccionadmos y creamos una asignación para cada alumno
-        foreach ($cursos as $curso) {
-            // Recuperamos los alumnos que pertenecen a este curso
-            $alumnos = DB::table('curso_academico_alumno')
-                ->where('ciclo_nombre', $curso)
-                ->pluck('alumno_id');
-            // Recorremos los alumnos y creamos una asignación para cada uno
-            foreach ($alumnos as $alumno) {
-                $asignacion = new Asignaciones();
-                $asignacion->convocatoria_id = $convocatoria->id;
-                $asignacion->alumnado_id = $alumno;
-                $asignacion->save();
-            }
+        if (!empty($cursos)) {
+            foreach ($cursos as $curso) {
+                // Recuperamos los alumnos que pertenecen a este curso
+                $alumnos = DB::table('curso_academico_alumno')
+                    ->where('ciclo_nombre', $curso)
+                    ->pluck('alumno_id');
+                // Recorremos los alumnos y creamos una asignación para cada uno
+                foreach ($alumnos as $alumno) {
+                    $asignacion = new Asignaciones();
+                    $asignacion->convocatoria_id = $convocatoria->id;
+                    $asignacion->alumnado_id = $alumno;
+                    $asignacion->save();
+                }
+            }  
         }
 
         if (isset($request->empresas)) {
@@ -305,20 +333,23 @@ class ConvocatoriasController extends Controller
     public function edit($id)
     {
         $convocatoria = Convocatorias::find($id);
-        $annos_consulta = DB::table('anno_academico')->orderByDesc('anno')->get();
-        $annos = array();
-        foreach ($annos_consulta as $anno) {
-            $annos[$anno->anno] = $anno->anno;
-        }
-        $cursos_consulta = DB::table('curso_academico')->get();
-        $cursos = array();
-        foreach ($cursos_consulta as $curso) {
-            $cursos[$curso->id] = $curso->curso . 'º ' . $curso->grupo . ' ' . $curso->ciclo . ' ' . $curso->turno;
-        }
-        $cursosSeleccionados = array();
-        foreach ($convocatoria->convocatoria_cursos as $curso) {
-            $cursosSeleccionados[] = $curso->curso_academico_id;
-        }
+        
+        // Recuperamos el año académico asociado a la convocatoria
+        $annoAcademico = curso_academico_new::find($convocatoria->anno_academico);
+        
+        // Recuperamos los cursos de este año académico
+        $cursos = DB::table('curso_academico_alumno')
+            ->where('curso_academico_id', $annoAcademico->id)
+            ->pluck('ciclo_nombre')
+            ->unique()
+            ->values();
+    
+        // Recuperamos los cursos seleccionados en la convocatoria
+        $cursosSeleccionados = DB::table('convocatoria_ciclo')
+            ->where('convocatoria_id', $convocatoria->id)
+            ->pluck('ciclo_nombre')
+            ->toArray();
+
         $empresas_consulta = DB::table('empresas')->get();
         $empresas = array();
         foreach ($empresas_consulta as $empresa) {
@@ -329,7 +360,7 @@ class ConvocatoriasController extends Controller
             $empresasSeleccionadas[] = $empresa->empresa_id;
         }
         
-        return view('convocatorias.edit', compact('convocatoria', 'annos', 'cursos', 'empresas', 'cursosSeleccionados', 'empresasSeleccionadas'));
+        return view('convocatorias.edit', compact('convocatoria', 'annoAcademico', 'cursos', 'empresas', 'cursosSeleccionados', 'empresasSeleccionadas'));
     }
 
     /**
@@ -348,11 +379,54 @@ class ConvocatoriasController extends Controller
 
         $cursos = $request->input('curso_academico');
         $convocatoria_cursos = [];
-        foreach ($cursos as $curso) {
-            $convocatoria_cursos[] = new Convocatoria_Cursos(['convocatoria_id' => $convocatoria->id, 'curso_academico_id' => $curso]);
+        // foreach ($cursos as $curso) {
+        //     $convocatoria_cursos[] = new Convocatoria_Cursos(['convocatoria_id' => $convocatoria->id, 'curso_academico_id' => $curso]);
+        // }
+        
+        // Guardamos los cursos asignados 
+        if (empty($cursos)) {
+            $convocatoria->ciclosDisponibles()->detach();
+            Asignaciones::where('convocatoria_id', $convocatoria->id)->delete();
+        } else {
+            $convocatoria->ciclosDisponibles()->sync($cursos);
+
+            // Obtener todos los alumnos que pertenecen a los cursos seleccionados
+            $alumnosSeleccionados = collect();
+            foreach ($cursos as $curso) {
+                $alumnos = DB::table('curso_academico_alumno')
+                    ->where('ciclo_nombre', $curso)
+                    ->pluck('alumno_id');
+                $alumnosSeleccionados = $alumnosSeleccionados->merge($alumnos);
+            }
+            $alumnosSeleccionados = $alumnosSeleccionados->unique();
+
+            // Eliminar asignaciones de alumnos cuyos cursos ya no estén asociados a la convocatoria
+            Asignaciones::where('convocatoria_id', $convocatoria->id)
+                ->whereNotIn('alumnado_id', $alumnosSeleccionados)
+                ->delete();
+
+            // Recorremos los cursos seleccionados y creamos una asignación para cada alumno solo si no existe
+            foreach ($cursos as $curso) {
+                // Recuperamos los alumnos que pertenecen a este curso
+                $alumnos = DB::table('curso_academico_alumno')
+                    ->where('ciclo_nombre', $curso)
+                    ->pluck('alumno_id');
+                // Recorremos los alumnos y creamos una asignación solo si no existe
+                foreach ($alumnos as $alumno) {
+                    $existe = Asignaciones::where('convocatoria_id', $convocatoria->id)
+                        ->where('alumnado_id', $alumno)
+                        ->exists();
+                    if (!$existe) {
+                        Asignaciones::create([
+                            'convocatoria_id' => $convocatoria->id,
+                            'alumnado_id' => $alumno,
+                            'empresa_id' => null,
+                            'profesores_id' => null
+                        ]);
+                    }
+                }
+            }
         }
-        $convocatoria->convocatoria_cursos()->delete();
-        $convocatoria->convocatoria_cursos()->saveMany($convocatoria_cursos);
 
         $empresas = $request->input('empresas');
         // $convocatoria->convocatoria_empresas()->delete();
@@ -372,9 +446,9 @@ class ConvocatoriasController extends Controller
         $convocatoria->estado = $request->input('estado');
         $convocatoria->save();
 
-        return redirect()->route('convocatorias.index')
+        return redirect()->route('convocatoria.show', ['convocatoria' => $convocatoria->id])
             ->with('success', 'La convocatoria ha sido actualizada correctamente.');
-    }
+        }
 
     public function verFormularioSeguimiento($alumnoId)
     {
@@ -416,7 +490,6 @@ class ConvocatoriasController extends Controller
         $empresa->observaciones = $convocatoriaEmpresa->observaciones;
 
         // Recuperamos la convocatoria
-        $convocatorias[] = Convocatorias::find($convocatoriaId);
         $convocatoria = Convocatorias::find($convocatoriaId);
 
 
@@ -437,7 +510,7 @@ class ConvocatoriasController extends Controller
             ->with('convocatoriaEmpresa')
             ->get();
 
-        return view('empresa.editarEmpresaConvocatoriaForm', compact('empresa', 'convocatoria', 'convocatorias', 'alumnos', 'profesores', 'especialidades', 'plazas'));
+        return view('empresa.editarEmpresaConvocatoriaForm', compact('empresa', 'convocatoria', 'alumnos', 'profesores', 'especialidades', 'plazas'));
     }
 
     // Método que recibe la request del formulario y actualiza la info de empresa en la convocatoria
@@ -457,11 +530,13 @@ class ConvocatoriasController extends Controller
         // Comprobar que las especialidades no se repiten
         $especialidades = $request->input('especialidades');
         $especialidadesUnicas = [];
-        foreach ($especialidades as $especialidad) {
-            if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
-                return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+        if (isset($especialidades)) {
+            foreach ($especialidades as $especialidad) {
+                if (in_array($especialidad['nombre'], $especialidadesUnicas)) {
+                    return redirect()->back()->withInput()->with('error', 'Las especialidades no pueden repetirse.');
+                }
+                $especialidadesUnicas[] = $especialidad['nombre'];
             }
-            $especialidadesUnicas[] = $especialidad['nombre'];
         }
 
         // Buscar la relación Convocatoria_Empresa
@@ -483,15 +558,17 @@ class ConvocatoriasController extends Controller
         OfertaPlaza::where('relacion_convocatoria_empresa_id', $convocatoriaEmpresa->id)->delete();
 
         // Crear las nuevas plazas
-        foreach ($especialidades as $especialidad) {
-            OfertaPlaza::create([
-                'relacion_convocatoria_empresa_id' => $convocatoriaEmpresa->id,
-                'especialidad' => $especialidad['nombre'],
-                'plazas' => $especialidad['plazas'],
-                'observaciones' => $especialidad['observaciones'],
-                'perfil' => $especialidad['perfil'],
-                'tareas' => $especialidad['tareas']
-            ]);
+        if (isset($especialidades)) {
+            foreach ($especialidades as $especialidad) {
+                OfertaPlaza::create([
+                    'relacion_convocatoria_empresa_id' => $convocatoriaEmpresa->id,
+                    'especialidad' => $especialidad['nombre'],
+                    'plazas' => $especialidad['plazas'],
+                    'observaciones' => $especialidad['observaciones'],
+                    'perfil' => $especialidad['perfil'],
+                    'tareas' => $especialidad['tareas']
+                ]);
+            }
         }
 
         return redirect()->route('convocatoria.show', ['convocatoria' => $convocatoriaId])

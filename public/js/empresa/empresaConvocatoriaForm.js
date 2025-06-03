@@ -66,13 +66,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <input type="number" name="especialidades[${rowIndex}][plazas]" class="form-control" placeholder="Número de Plazas" min="1" required>
             </td>
             <td>
-                <input type="text" name="especialidades[${rowIndex}][perfil]" class="form-control" placeholder="Perfil" required>
+                <input type="text" name="especialidades[${rowIndex}][perfil]" class="form-control" placeholder="Perfil">
             </td>
             <td>
-                <input type="text" name="especialidades[${rowIndex}][tareas]" class="form-control" placeholder="Tareas" required>
+                <input type="text" name="especialidades[${rowIndex}][tareas]" class="form-control" placeholder="Tareas">
             </td>
             <td>
-                <input type="text" name="especialidades[${rowIndex}][observaciones]" class="form-control" placeholder="Observaciones" required>
+                <input type="text" name="especialidades[${rowIndex}][observaciones]" class="form-control" placeholder="Observaciones">
             </td>
             <td>
                 <button type="button" class="btn btn-danger remove-row" title="Eliminar esta fila de la tabla">
