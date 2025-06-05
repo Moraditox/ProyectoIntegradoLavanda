@@ -18,12 +18,14 @@
             </div>
             <button type="submit" class="btn btn-primary mb-2">Buscar</button>
         </form>
-        @foreach ($annos as $anno)
+        @foreach ($annos as $index => $anno)
             <div class="card m-4">
-                <div class="card-header text-center">{{ $anno["years"] }}</div>
-                <div class="card-body">
+                <div class="card-header text-center d-flex align-items-center justify-content-center" style="cursor:pointer;" onclick="toggleCursos({{ $index }})">
+                    <span id="arrow-{{ $index }}" style="transition: transform 0.2s;">&#9654;</span>
+                    <span class="ml-2">{{ $anno["years"] }}</span>
+                </div>
+                <div class="card-body" id="cursos-{{ $index }}" style="display:none;">
                     @foreach ($cursos as $curso)
-
                         @if (isset($numeroAlumnos[$anno["years"]][$curso["nombre"]]) && $numeroAlumnos[$anno["years"]][$curso["nombre"]] > 0)
                             <div class="card mb-3">
                                 <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #fce4ec 0%, #e3f2fd 100%); border-radius: 8px;">
@@ -35,9 +37,7 @@
                                         <span class="badge badge-pill badge-primary px-3 py-2 mr-3" style="font-size: 1rem;">
                                             {{ $numeroAlumnos[$anno["years"]][$curso["nombre"]] }} alumno(s)
                                         </span>
-                                        <a href="{{ url('/alumnos/' . $anno['years'] . '/' . $curso['nombre']) }}" class="btn btn-info btn-sm shadow-sm">
-                                            <i class="fas fa-users"></i> Ver alumnos
-                                        </a>
+                                        <a href="{{ url('/alumnos/' . $anno['years'] . '/' . $curso['nombre']) }}" class="btn btn-info btn-sm shadow-sm"><i class="fas fa-users"></i> Ver alumnos</a>
                                     </div>
                                 </div>
                             </div>
@@ -48,4 +48,17 @@
             </div>
         @endforeach
     </div>
+    <script>
+        function toggleCursos(index) {
+            var cursos = document.getElementById('cursos-' + index);
+            var arrow = document.getElementById('arrow-' + index);
+            if (cursos.style.display === 'none') {
+                cursos.style.display = 'block';
+                arrow.style.transform = 'rotate(90deg)';
+            } else {
+                cursos.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
 @endsection

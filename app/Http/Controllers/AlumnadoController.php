@@ -254,13 +254,19 @@ class AlumnadoController extends Controller
      */
     public function infoCurso($anno, $curso)
     {
-        $anno = Anno_Academico::where('anno', $anno)->first();
-        $curso = Curso_Academico::where('id', $curso)->first();
-        $matriculas = Matricula::where('curso_academico_id', $curso->id)->where('anno_academico', $anno->anno)->get();
-        $alumnos = array();
-        foreach ($matriculas as $matricula) {
-            $alumnos[] = Alumnado::where('id', $matricula->alumno_id)->first();
-        }
+        // Obtengo el id del año primero
+        $anno_id = CursosAcademicos::where('years', $anno)->value('id');
+        $alumno = Curso_academico_alumno::where('curso_academico_id', $anno_id)
+            ->where('ciclo_nombre', $curso)
+            ->get();
+        $alumnos_filtro = $alumno->toArray();
+        // $anno = Anno_Academico::where('anno', $anno)->first();
+        // $curso = Curso_Academico::where('id', $curso)->first();
+        // $matriculas = Matricula::where('curso_academico_id', $curso->id)->where('anno_academico', $anno->anno)->get();
+        // $alumnos = array();
+        foreach ($alumnos_filtro as $matricula) {
+            $alumnos[] = Alumnado::where('id', $matricula['alumno_id'])->first();
+        };
         
         return view('alumnado.infoCurso', compact('alumnos', 'curso', 'anno'));
     }
