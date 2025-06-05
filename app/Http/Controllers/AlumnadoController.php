@@ -7,11 +7,13 @@ use App\Models\Alumnado;
 use App\Models\Anno_Academico;
 use App\Models\Asignaciones;
 use App\Models\Ciclos;
+use App\Models\ciclosDisponibles;
 use App\Models\Convocatoria_Cursos;
 use App\Models\Convocatorias;
 use App\Models\Curso_Academico;
 use App\Models\Curso_academico_alumno;
 use App\Models\curso_academico_new;
+use App\Models\CursosAcademicos;
 use App\Models\Empresa;
 use App\Models\Formulario_Seguimiento_Alumno;
 use App\Models\Formulario_Seguimiento_Empresa;
@@ -217,10 +219,34 @@ class AlumnadoController extends Controller
      */
     public function listadoCursos()
     {
-        $cursos = Curso_Academico::all()->groupBy('ciclo');
-        $annos = DB::table('anno_academico')->orderBy('anno', 'desc')->get();
-        $matriculas = Matricula::all();
-        return view('alumnado.listadoCursos', compact('cursos', 'annos', 'matriculas'));
+        // Necesito obtener los años academicos que hay en la tabla cursos academicos
+        $annos = CursosAcademicos::select("id", 'years')
+            ->distinct()
+            ->orderBy('years', 'desc')
+            ->get();
+
+        // Voy a sacar de cada año academico que alumnos estan matriculados 
+        $cursos = ciclosDisponibles::all();
+        // Convierto los años y los cursos a un array
+        $cursos = $cursos->toArray();
+        $annos = $annos->toArray();
+
+        $numeroAlumnos = array();
+
+        foreach ($annos as $anno) {
+            // Obtengo de la tabla (curso academico alumno) el numero de alumnos que hay matriculados en cada curso academico
+            foreach ($cursos as $curso){
+                // Obtengo el numero de alumnos de cada ciclo
+                $numeroAlumnos[$anno["years"]][$curso["nombre"]] = Curso_academico_alumno::where('curso_academico_id', $anno["id"])
+                    ->where('ciclo_nombre', $curso["nombre"])
+                    ->count();
+            }
+        }
+
+        // $cursos = Curso_Academico::all()->groupBy('ciclo');
+        // $annos = DB::table('anno_academico')->orderBy('anno', 'desc')->get();
+        // $matriculas = Matricula::all();
+        return view('alumnado.listadoCursos', compact('cursos', 'annos', 'numeroAlumnos'));
     }
 
     /**

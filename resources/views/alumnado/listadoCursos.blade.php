@@ -20,42 +20,26 @@
         </form>
         @foreach ($annos as $anno)
             <div class="card m-4">
-                <div class="card-header text-center">{{ $anno->anno }}</div>
+                <div class="card-header text-center">{{ $anno["years"] }}</div>
                 <div class="card-body">
                     @foreach ($cursos as $curso)
-                        @php
-                            $cursosConAlumnos = [];
-                            foreach ($curso as $c) {
-                                $alumnos = DB::table('matricula')
-                                    ->where('anno_academico', '=', $anno->anno)
-                                    ->where('curso_academico_id', '=', $c['id'])
-                                    ->count();
-                                if ($alumnos > 0) {
-                                    $c['alumnos'] = $alumnos;
-                                    $cursosConAlumnos[] = $c;
-                                }
-                            }
-                        @endphp
-                        @if (count($cursosConAlumnos) > 0)
-                            <h5 class="mt-4 mb-3 text-center">{{ $curso[0]['ciclo'] }}</h5>
-                            <div class="d-flex justify-content-around flex-wrap">
-                                @foreach ($cursosConAlumnos as $c)
-                                    <div class="card m-2 text-center" style="width: 40%">
-                                        <div class="card-header">
-                                            {{ $c['curso'] . 'º ' . $c['grupo'] . ' ' . $c['turno'] }}
-                                        </div>
-                                        <div class="card-body">
-                                            <code>{{ 'Hay ' . $c['alumnos'] . ' alumnos matriculados.' }}</code>
-                                        </div>
-                                        <div class="card-footer">
-                                            @php
-                                                $anio = str_replace('/', '-', $anno->anno);
-                                            @endphp
-                                            <a href="{{ route('alumnos.infoCurso', ['anno' => $anio, 'curso' => $c['id']]) }}"
-                                                class="btn btn-primary">Ver alumnos</a>
-                                        </div>
+
+                        @if (isset($numeroAlumnos[$anno["years"]][$curso["nombre"]]) && $numeroAlumnos[$anno["years"]][$curso["nombre"]] > 0)
+                            <div class="card mb-3">
+                                <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #fce4ec 0%, #e3f2fd 100%); border-radius: 8px;">
+                                    <div class="d-flex align-items-center mb-2 mb-md-0">
+                                        <i class="fas fa-chalkboard-teacher fa-lg text-primary mr-2"></i>
+                                        <span class="font-weight-bold" style="font-size: 1.2rem;">{{ $curso["nombre"] }}</span>
                                     </div>
-                                @endforeach
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge badge-pill badge-primary px-3 py-2 mr-3" style="font-size: 1rem;">
+                                            {{ $numeroAlumnos[$anno["years"]][$curso["nombre"]] }} alumno(s)
+                                        </span>
+                                        <a href="{{ url('/alumnos/' . $anno['years'] . '/' . $curso['nombre']) }}" class="btn btn-info btn-sm shadow-sm">
+                                            <i class="fas fa-users"></i> Ver alumnos
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     @endforeach
