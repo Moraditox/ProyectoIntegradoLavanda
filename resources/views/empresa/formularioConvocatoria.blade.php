@@ -1,7 +1,7 @@
 <div class="form-row">
     <div class="form-group col-md-2">
         <label for="convocatoria_id">{{ __('Convocatoria') }}</label>
-        <input type="text" class="form-control" value="{{ $convocatoria->periodo }} - {{ $convocatoria->anno_academico }}" disabled>
+        <input type="text" class="form-control" value="{{ $periodos[0] }} - {{ $annoAcademicoYears }}" disabled>
         <input type="hidden" name="convocatoria_id" value="{{ $convocatoria->id }}">
     </div>
     <div class="form-group col-md-3">

@@ -526,14 +526,27 @@ class EmpresaController extends Controller
         $ultimoAnno = DB::table('cursos_academicos')->orderByDesc('years')->first();
         $convocatoria = DB::table('convocatorias')
             ->where('estado', 'Preparación')
-            ->where('anno_academico', $ultimoAnno->id)
             ->first();
 
         if (!$convocatoria) {
             return redirect()->back()->with('error', 'No hay convocatorias disponibles en estado Preparación.');
         }
+
+        $curso_academico_id = $convocatoria->anno_academico;
         
         $convocatoria->anno_academico = $ultimoAnno->years;
+        $convocatoriasPreparacion = DB::table('convocatorias')
+            ->where('estado', 'Preparación')
+            ->get();
+        $idAnno = collect($convocatoriasPreparacion)->pluck('anno_academico')->first();
+        $annoAcademicoYears = null;
+        if ($idAnno) {
+            // Obtener el id del año académico asociado a la convocatoria seleccionada
+            $annoAcademico = DB::table('cursos_academicos')->where('id', $idAnno)->first();
+            $annoAcademicoYears = $annoAcademico ? $annoAcademico->years : null;
+        }
+
+        $periodos = collect($convocatoriasPreparacion)->pluck('periodo')->unique()->values()->all();
 
         // Recuperamos a los profesores y alumnos relacionados al la convocatoria seleccionada
         // *** SIN IMPLEMENTAR ***
@@ -575,7 +588,17 @@ class EmpresaController extends Controller
             return (object) $alumno;
         });
 
-        $profesores = DB::table('profesores')->get();
+        // $profesores = DB::table('profesores')->get();
+
+        // Obtén los IDs de los profesores asociados a ese curso académico
+        $profesoresIds = DB::table('curso_academico_profesor')
+            ->where('curso_academico_id', $curso_academico_id)
+            ->pluck('profesor_id');
+
+        // Recupera los profesores con esos IDs
+        $profesores = DB::table('profesores')
+            ->whereIn('id', $profesoresIds)
+            ->get();
 
         // Recuperamos las especialidades de la empresa
         $especialidades = DB::table('ciclos_disponibles')
@@ -584,7 +607,7 @@ class EmpresaController extends Controller
             ->values()
             ->all();
 
-        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatoria', 'alumnos', 'profesores', 'especialidades'));
+        return view('empresa.unirseConvocatoriaForm', compact('empresa', 'convocatoria','periodos', 'annoAcademicoYears', 'alumnos', 'profesores', 'especialidades', 'convocatoriasPreparacion'));
     }
 
     // Método que recoge los datos del formulario para unir una empresa a una convocatoria
@@ -649,6 +672,30 @@ class EmpresaController extends Controller
                     'tareas' => $especialidad['tareas']
                 ]);
             }
+        }
+
+        // Si se ha seleccionado un alumno, modificamos su asignación para que guarde la empresa como asignada
+        // Y el profesor también en caso de que se haya seleccionado
+        if ($request->input('alumno_referencia_id')) {
+            $alumnoId = $request->input('alumno_referencia_id');
+            $profesorId = $request->input('profesor_referencia_id');
+            $empresaId = $empresa->id;
+            $convocatoriaId = $convocatoria_empresa->convocatoria_id;
+            $observaciones = $request->input('observaciones');
+            $alumnoEnabled = true;
+
+            Asignaciones::updateOrCreate(
+                [
+                    'alumnado_id' => $alumnoId,
+                    'convocatoria_id' => $convocatoriaId
+                ],
+                [
+                    'empresa_id' => $empresaId,
+                    'profesores_id' => $profesorId,
+                    'observaciones' => $observaciones,
+                    'enabled' => $alumnoEnabled
+                ]
+            );
         }
 
         return redirect()->route('empresas.index')

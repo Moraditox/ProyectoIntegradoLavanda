@@ -33,7 +33,7 @@ class ActuacionesEmpresaController extends Controller
         $validatedData = $request->validate([
             'id_profesor' => 'required|integer|exists:profesores,id',
             'id_empresa' => 'required|integer|exists:empresas,id',
-            'descripcion' => 'nullable|string',
+            'descripción' => 'nullable|string',
             'contacto' => 'required|string|max:255',
         ]);
 

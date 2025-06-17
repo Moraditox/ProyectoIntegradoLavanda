@@ -20,7 +20,6 @@
                             @csrf
 
                             @include('convocatorias.form')
-
                         </form>
                     </div>
                 </div>

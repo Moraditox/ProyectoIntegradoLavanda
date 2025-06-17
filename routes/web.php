@@ -11,6 +11,7 @@ use App\Http\Controllers\ActuacionesEmpresaController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MatriculaController;
 use App\Http\Controllers\CursoAcademicoNewController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

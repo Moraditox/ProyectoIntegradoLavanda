@@ -36,7 +36,8 @@ class ActuacionesController extends Controller
     public function create()
     {
         $actuacion = new Actuaciones();
-        return view('actuaciones.create', compact('actuacion'));
+        return redirect()->back()->with('error', 'La creación de actuaciones no está implementada todavía.');
+        // return view('actuaciones.create', compact('actuacion'));
     }
 
     /**
@@ -47,31 +48,9 @@ class ActuacionesController extends Controller
      */
     public function store(Request $request)
     {
-        // Validación de los campos del formulario
-        $validator = Validator::make($request->all(), Actuaciones::$rules);
-
-        if ($validator->fails()) {
-            return redirect()->route('actuaciones.create')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Crear una nueva instancia de Actuaciones con los datos del formulario
-        $actuacion = new Actuaciones([
-            'emisor' => $request->input('emisor'),
-            'tipo' => $request->input('tipo'),
-            'observaciones' => $request->input('observaciones'),
-            'informe_alumno_id' => $request->input('informe_alumno_id'),
-            'informe_empresa_id' => $request->input('informe_empresa_id'),
-            'asignacion_id' => $request->input('asignacion_id'),
-        ]);
-
-        // Guardar la actuación en la base de datos
-        $actuacion->save();
-
-        // Redireccionar a la vista de índice o a donde sea apropiado
-        return redirect()->route('convocatorias.index')
-            ->with('success', 'Actuación creada exitosamente.');
+        // Devuelve un error indicando que la creación no está implementada
+        return redirect()->route('actuaciones.create')
+            ->with('error', 'La creación de actuaciones no está implementada todavía.');
     }
 
     /**
@@ -85,8 +64,12 @@ class ActuacionesController extends Controller
         // Validación de los campos del formulario
         $validator = Validator::make($request->all(), Actuaciones::$rules);
 
+        return redirect()->route('actuaciones.create')
+            ->with('error', 'La creación de actuaciones no está implementada todavía.');
+
+
         if ($validator->fails()) {
-            return redirect()->route('actuaciones.create')
+            return redirect()->route('actuaciones.index')
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -103,11 +86,8 @@ class ActuacionesController extends Controller
 
         // Guardar la actuación en la base de datos
         $actuacion->save();
-
-        // Redireccionar al índice de convocatorias
-        return redirect()->route('convocatorias.index')
-            ->with('success', 'Actuación creada manualmente exitosamente.');
+        // Devuelve un error indicando que la creación no está implementada
+        return redirect()->route('actuaciones.create')
+            ->with('error', 'La creación de actuaciones no está implementada todavía.');
     }
-
-    // Otros métodos
 }

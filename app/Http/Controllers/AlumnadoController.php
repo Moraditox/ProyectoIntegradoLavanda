@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Actuaciones;
 use App\Models\Alumnado;
-use App\Models\Anno_Academico;
+use App\Models\CiclosDisponibles;
+use App\Models\CursosAcademicos;
 use App\Models\Asignaciones;
 use App\Models\Ciclos;
 use App\Models\Convocatoria_Cursos;
@@ -79,9 +80,22 @@ class AlumnadoController extends Controller
         $convocatoria = Convocatorias::where('estado', 'Preparación')->first();
 
         // Recuperamos el curso academico más reciente
-        $annoAcademico = curso_academico_new::orderBy('created_at', 'desc')->first();
+        $annoAcademico = curso_academico_new::select('id', 'years')->get();
+        $annoAcademico = $annoAcademico->toArray();
 
-        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatoria', 'annoAcademico'));
+        // Obtener el año y mes actual
+        $year = date('Y');
+        $month = date('n');
+
+        // Si el mes es mayor a junio, el año académico es año actual - año siguiente
+        if ($month > 6) {
+            $annoActual = $year . '-' . ($year + 1);
+        } else {
+            // Si el mes es junio o anterior, el año académico es año anterior - año actual
+            $annoActual = ($year - 1) . '-' . $year;
+        }
+
+        return view('alumnado.importarAlumnos', compact('actionImportar', 'actionImagenes', 'cursos', 'convocatoria', 'annoAcademico', 'annoActual'));
     }
 
 
@@ -107,23 +121,23 @@ class AlumnadoController extends Controller
         $csv_data = array_map('str_getcsv', file($file_path));
 
         // El primer elemento del array es el encabezado, se usa como claves para cada fila
-        $encabezado = array_shift($csv_data);
+        $encabezado_raw = array_shift($csv_data);
+
+        $encabezado = array_map(function ($col) {
+            return strtolower(trim(preg_replace('/[\x00-\x1F\x7F\xA0\xEF\xBB\xBF]/u', '', $col)));
+        }, $encabezado_raw);
 
         $filas = array();
         foreach ($csv_data as $fila) {
-            $filas[] = array_combine($encabezado, $fila);
+            // También limpiamos los valores individuales (opcional pero recomendable)
+            $fila_limpia = array_map('trim', $fila);
+            $filas[] = array_combine($encabezado, $fila_limpia);
         }
 
         // Procesar y guardar los datos en la base de datos
         $alumnosDuplicados = [];
 
         foreach ($filas as $fila) {
-            // Verifica si el alumno ya está matriculado en la misma convocatoria
-            // $alumnoExistente = Matricula::whereHas('alumnado', function ($query) use ($fila) {
-            //     $query->where('nie', $fila['nie']);
-            // })->whereHas('asignaciones', function ($query) use ($convocatoriaId) {
-            //     $query->where('convocatoria_id', $convocatoriaId);
-            // })->exists();
 
             // Comprobamos si el alumno ya existe en la base de datos usando el DNI, no lo volvemos a insertar
             $alumnoExistente = Alumnado::where('nie', $fila['nie'])->exists();
@@ -160,13 +174,6 @@ class AlumnadoController extends Controller
 
                 continue;
             }
-            
-            // Matricular al alumno en el curso actual
-            // $matricula = new Matricula();
-            // $matricula->alumno_id = $alumno->id;
-            // $matricula->curso_academico_id = $request->curso;
-            // $matricula->anno_academico = $anno_actual;
-            // $matricula->save();
 
             // Creamos la relación entre el alumno y el curso académico
             $cursoAcademico = new Curso_academico_alumno();
@@ -217,10 +224,34 @@ class AlumnadoController extends Controller
      */
     public function listadoCursos()
     {
-        $cursos = Curso_Academico::all()->groupBy('ciclo');
-        $annos = DB::table('anno_academico')->orderBy('anno', 'desc')->get();
-        $matriculas = Matricula::all();
-        return view('alumnado.listadoCursos', compact('cursos', 'annos', 'matriculas'));
+        // Necesito obtener los años academicos que hay en la tabla cursos academicos
+        $annos = CursosAcademicos::select("id", 'years')
+            ->distinct()
+            ->orderBy('years', 'desc')
+            ->get();
+
+        // Voy a sacar de cada año academico que alumnos estan matriculados 
+        $cursos = CiclosDisponibles::all();
+        // Convierto los años y los cursos a un array
+        $cursos = $cursos->toArray();
+        $annos = $annos->toArray();
+
+        $numeroAlumnos = array();
+
+        foreach ($annos as $anno) {
+            // Obtengo de la tabla (curso academico alumno) el numero de alumnos que hay matriculados en cada curso academico
+            foreach ($cursos as $curso){
+                // Obtengo el numero de alumnos de cada ciclo
+                $numeroAlumnos[$anno["years"]][$curso["nombre"]] = Curso_academico_alumno::where('curso_academico_id', $anno["id"])
+                    ->where('ciclo_nombre', $curso["nombre"])
+                    ->count();
+            }
+        }
+
+        // $cursos = Curso_Academico::all()->groupBy('ciclo');
+        // $annos = DB::table('anno_academico')->orderBy('anno', 'desc')->get();
+        // $matriculas = Matricula::all();
+        return view('alumnado.listadoCursos', compact('cursos', 'annos', 'numeroAlumnos'));
     }
 
     /**
@@ -228,13 +259,15 @@ class AlumnadoController extends Controller
      */
     public function infoCurso($anno, $curso)
     {
-        $anno = Anno_Academico::where('anno', $anno)->first();
-        $curso = Curso_Academico::where('id', $curso)->first();
-        $matriculas = Matricula::where('curso_academico_id', $curso->id)->where('anno_academico', $anno->anno)->get();
-        $alumnos = array();
-        foreach ($matriculas as $matricula) {
-            $alumnos[] = Alumnado::where('id', $matricula->alumno_id)->first();
-        }
+        // Obtengo el id del año primeroAdd commentMore actions
+        $anno_id = CursosAcademicos::where('years', $anno)->value('id');
+        $alumno = Curso_academico_alumno::where('curso_academico_id', $anno_id)
+            ->where('ciclo_nombre', $curso)
+            ->get();
+        $alumnos_filtro = $alumno->toArray();
+        foreach ($alumnos_filtro as $matricula) {
+            $alumnos[] = Alumnado::where('id', $matricula['alumno_id'])->first();
+        };
         
         return view('alumnado.infoCurso', compact('alumnos', 'curso', 'anno'));
     }

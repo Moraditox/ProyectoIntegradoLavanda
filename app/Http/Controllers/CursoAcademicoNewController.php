@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Curso_Academico_new;
+use App\Models\curso_academico_new;
+use App\Models\Profesores; 
 
 class CursoAcademicoNewController extends Controller
 {
     public function index()
     {
         // Obtener todos los cursos académicos
-        $courses = Curso_Academico_new::all();
+        $courses = curso_academico_new::with('profesores')->orderByDesc('years')->get();
+
 
         return view('curso_academico.index', compact('courses'));
     }
@@ -22,10 +24,10 @@ class CursoAcademicoNewController extends Controller
     public function addTeachersToCourse($courseId)
     {
         // Recuperamos todos los profesores de la base de datos
-        $teachers = \App\Models\Profesores::all();
+        $teachers = Profesores::all();
 
         // Recuperamos el curso académico específico
-        $course = Curso_Academico_new::findOrFail($courseId);
+        $course = curso_academico_new::findOrFail($courseId);
 
         if (!$course) {
             return redirect()->route('cursos.index')->with('error', 'Curso académico no encontrado');
@@ -47,7 +49,7 @@ class CursoAcademicoNewController extends Controller
         ]);
 
         // Recuperamos el curso académico
-        $course = Curso_Academico_new::findOrFail($courseId);
+        $course = curso_academico_new::findOrFail($courseId);
 
         // Asignamos los profesores seleccionados al curso
         // Esto se sincroniza la relación muchos a muchos entre cursos y profesores

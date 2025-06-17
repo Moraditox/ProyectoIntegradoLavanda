@@ -60,7 +60,16 @@ class ProfesoradoController extends Controller
         }
 
         // Procesar y guardar los datos en la base de datos
+        $hayDuplicados = false;
+
         foreach ($filas as $fila) {
+            if (
+            Profesores::where('email', $fila['email'])->exists() ||
+            User::where('email', $fila['email'])->exists()
+            ) {
+            $hayDuplicados = true;
+            continue;
+            }
             $profesor = new Profesores();
             $profesor->apellido1 = $fila['apellido1'];
             $profesor->apellido2 = $fila['apellido2'];
@@ -70,12 +79,16 @@ class ProfesoradoController extends Controller
 
             // Añadir a la tabla users
             User::create([
-                'name' => $fila['nombre'] . ' ' . $fila['apellido1'] . ' ' . $fila['apellido2'],
-                'email' => $fila['email'],
+            'name' => $fila['nombre'] . ' ' . $fila['apellido1'] . ' ' . $fila['apellido2'],
+            'email' => $fila['email'],
             ]);
         }
 
-        return redirect()->route('profesorado')->with('success', 'Los profesores se han importado correctamente.');
+        $mensaje = $hayDuplicados
+            ? 'Los profesores se han importado correctamente y los duplicados se han ignorado.'
+            : 'Los profesores se han importado correctamente.';
+
+        return redirect()->route('profesorado')->with('success', $mensaje);
     }
 
 

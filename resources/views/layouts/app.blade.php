@@ -167,7 +167,7 @@
             <p class="text-gray-500 text-sm text-center sm:text-left">&copy; <?php echo date('Y'); ?> Lavanda. Todos los
                 derechos reservados.</p>
             <span class="inline-flex sm:ml-auto sm:mt-0 mt-2 justify-center sm:justify-start">
-                <p class="text-gray-500 text-sm text-center sm:text-left">Creado por Raúl Pantoja y Álvaro García</p>
+                <p class="text-gray-500 text-sm text-center sm:text-left">Creado por Raúl Bermúdez, Jesús Ferrer y Héctor Mora</p>
             </span>
         </div>
     </footer>

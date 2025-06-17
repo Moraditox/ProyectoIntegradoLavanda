@@ -13,8 +13,9 @@
                             <p class="card-text"><strong>Email:</strong> <a
                                     href="mailto:{{ $alumno->email_corporativo }}">{{ $alumno->email_corporativo }}</a></p>
                         </div>
-                        <div class="card-footer">
+                        <div class="card-footer d-flex justify-content-between">
                             <a href="{{ route('alumnos.infoAlumno', $alumno->id) }}" class="btn btn-primary">Más información</a>
+                            <a href="{{ url('/alumnos/' . $alumno->id) }}" class="btn btn-secondary">Ver alumno</a>
                         </div>
                     </div>
                 </div>

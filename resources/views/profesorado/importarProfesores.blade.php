@@ -11,7 +11,7 @@
     <li><code>nombre</code></li>
     <li><code>email</code></li>
 </ul>
-<li>Descargar ejemplo CSV: <a href="{{ asset('storage/profesorado/EjemploCSV.csv') }}">Descargar</a></li>
+<li>Descargar ejemplo CSV: <a href="{{ asset('storage/profesorado/EjemploCSVProfesorado.csv') }}">Descargar</a></li>
 @endsection
 
 @section('action')

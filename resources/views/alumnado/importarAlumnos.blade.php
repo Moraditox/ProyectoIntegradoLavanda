@@ -1,7 +1,7 @@
 @extends('importar')
 
 @section('titulo')
-<h1>Importar alumnos {{ $annoAcademico->years}}</h1>
+<h1>Importar alumnos</h1>
 @endsection
 
 @section('requisitos')
@@ -15,6 +15,6 @@
     <li><code>dni</code></li>
     <li><code>movil</code></li>
 </ul>
-<li>Descargar ejemplo CSV: <a href="{{ asset('storage/alumnado/EjemploCSV.csv') }}">Descargar</a></li>
+<li>Descargar ejemplo CSV: <a href="{{ asset('storage/alumnado/EjemploCSVAlumnado.csv') }}">Descargar</a></li>
 
 @endsection

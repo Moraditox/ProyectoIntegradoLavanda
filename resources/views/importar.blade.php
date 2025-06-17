@@ -7,7 +7,7 @@
         <p>{{ $message }}</p>
     </div>
     @endif
-    
+
     @if ($duplicados = Session::get('duplicados'))
     <div class="alert alert-warning">
         <p>Alumnos duplicados: {{ implode(', ', $duplicados) }}</p>
@@ -15,7 +15,6 @@
     @endif
 
         @yield('titulo')
-        <p>Ten en cuenta de que los alumnos se importan al curso académico más reciente, en este caso {{ $annoAcademico->years}}.</p>
         <p>Antes de importar los datos, asegúrate de que el archivo CSV cumpla con los siguientes requisitos:</p>
         <ol>
             <li>El archivo debe estar en formato CSV.</li>
@@ -48,11 +47,22 @@
                     @endif
                 </div>
             </div>
+            @if (!request()->is('profesorado*'))
+            <div class="form-group">
+                <label for="anno_academico">Seleccione el año académico</label>
+                <select name="anno_academico" id="anno_academico" class="form-control" required>
+                    @foreach ($annoAcademico as $anno)
+                        <option value="{{ $anno["id"] }}" {{ (isset($annoActual) && $anno["years"] == $annoActual) ? 'selected' : '' }}>
+                            {{ $anno["years"] }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div class="form-group">
                 <label for="archivo">Seleccionar archivo CSV</label>
                 <input type="file" name="archivo" id="archivo" accept=".csv" required>
             </div>
-            <input type="hidden" name="anno_academico" value="{{ $annoAcademico->id }}">
             <button type="submit" class="btn btn-primary">Importar</button>
         </form>
     </div>
